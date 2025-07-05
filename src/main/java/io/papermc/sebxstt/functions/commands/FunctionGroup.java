@@ -8,6 +8,7 @@ import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.StorageTeam;
+import io.papermc.sebxstt.providers.PlayerProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
 import net.kyori.adventure.text.Component;
@@ -129,6 +130,7 @@ public class FunctionGroup {
         pc.setCurrentGroup(grp.getId());
         pc.setPlayerType(PlayerTypeGroup.MANAGER);
 
+        PlayerProvider.setup(p.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
         DS.create(PlayerGroupData.create(grp), PlayerGroupData.class);
         p.sendMessage(mm.deserialize(

@@ -11,6 +11,7 @@ import io.papermc.sebxstt.instances.RequestGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -163,9 +164,29 @@ public class Lib {
         return playerConfig;
     }
 
-    public static PlayersGroup FindOwnerInGroup(UUID owner) {
-        if (mainData.playersGroups == null) return null;
-        return mainData.playersGroups.stream().filter(group -> group.getOwner().equals(owner)).findFirst().orElse(null);
+    public static void setCustomNameTag(Player target, String name, ChatColor color) {
+        if (nameTags.containsKey(target.getUniqueId())) {
+            ArmorStand old = nameTags.remove(target.getUniqueId());
+            if (old != null && !old.isDead()) old.remove();
+        }
+
+        ArmorStand as = target.getWorld().spawn(target.getLocation().add(0, 2.2, 0), ArmorStand.class);
+
+        as.setVisible(false);
+        as.setGravity(false);
+        as.setMarker(true);
+        as.setCustomNameVisible(true);
+        as.setSilent(true);
+        as.setBasePlate(false);
+        as.setSmall(true);
+
+        if (color != null) {
+            as.setCustomName(color + name);
+        } else {
+            as.setCustomName(name);
+        }
+
+        nameTags.put(target.getUniqueId(), as);
     }
 
     public static PlayersGroup FindPlayerInGroup(String name) {
@@ -207,15 +228,5 @@ public class Lib {
         }
 
         return closestMembers;
-    }
-
-    public static boolean PlayerIsOwner(Player player, Collection<PlayersGroup> playersGroups) {
-        for (PlayersGroup pg : playersGroups) {
-            if (InPlayer.name(pg.getOwner()).equals(player.getName())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
