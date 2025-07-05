@@ -51,7 +51,7 @@ public class PlayersGroup {
         this.members = new ArrayList<>();
 
         this.team = board.registerNewTeam(name);
-        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.ALWAYS);
+        team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
         team.setOption(Team.Option.COLLISION_RULE,      Team.OptionStatus.NEVER);
         team.setColor(color);
         team.setPrefix(color.toString());
