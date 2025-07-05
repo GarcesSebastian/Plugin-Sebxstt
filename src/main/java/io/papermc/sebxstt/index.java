@@ -12,6 +12,7 @@ import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.managers.CommandManager;
 import io.papermc.sebxstt.providers.ConfigurationProvider;
 import io.papermc.sebxstt.providers.DataStoreProvider;
+import io.papermc.sebxstt.providers.PlayerProvider;
 import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
@@ -20,16 +21,14 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -41,6 +40,7 @@ import java.util.*;
 
 public class index extends JavaPlugin implements Listener {
     public static Main mainData = new Main();
+    public static final Map<UUID, ArmorStand> nameTags = new HashMap<>();
     public static final MiniMessage mm = MiniMessage.miniMessage();
 
     @Override
@@ -117,6 +117,7 @@ public class index extends JavaPlugin implements Listener {
         }
 
         Player player = event.getPlayer();
+        PlayerProvider.setup(player.getUniqueId());
         PlayersGroup grp = Lib.FindPlayerInGroup(player.getName());
         player.removePotionEffect(PotionEffectType.GLOWING);
 
@@ -141,6 +142,11 @@ public class index extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
+        ArmorStand as = nameTags.remove(event.getPlayer().getUniqueId());
+        if (as != null && !as.isDead()) {
+            as.remove();
+        }
+
         PlayerConfig pc = Lib.getPlayerConfig(player);
         if (pc == null) {
             this.getLogger().warning("No se encontró configuración para el jugador " + player.getName() + " al desconectarse.");
@@ -156,10 +162,23 @@ public class index extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        ArmorStand as = nameTags.get(player.getUniqueId());
+        if (as != null && !as.isDead()) {
+            Location to = player.getLocation().clone();
+            Location newLoc = to.clone().add(0, 2.6, 0);
+            as.teleport(newLoc);
+            player.showEntity(this, as);
+        }
+    }
+
+    @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
 
-        Bukkit.getScheduler().runTask(this, () -> {
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            PlayerProvider.setup(player.getUniqueId());
             PlayersGroup grp = Lib.FindPlayerInGroup(player.getName());
             player.removePotionEffect(PotionEffectType.GLOWING);
 
@@ -167,7 +186,7 @@ public class index extends JavaPlugin implements Listener {
                 grp.TargetMembers();
                 grp.updateSidebar();
             }
-        });
+        }, 1L);
     }
 
     @EventHandler

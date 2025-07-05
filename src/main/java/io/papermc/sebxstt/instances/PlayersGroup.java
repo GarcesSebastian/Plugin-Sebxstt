@@ -3,6 +3,7 @@ package io.papermc.sebxstt.instances;
 import io.papermc.sebxstt.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.functions.utils.Lib;
+import io.papermc.sebxstt.providers.PlayerProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
 import net.kyori.adventure.text.Component;
@@ -28,7 +29,7 @@ public class PlayersGroup {
     public UUID id;
     public String name;
     public UUID owner;
-    public ArrayList<UUID> members = new ArrayList<>();
+    public ArrayList<UUID> members;
     public int level = 1;
     public ChatColor color;
     public StorageTeam storage;
@@ -127,6 +128,7 @@ public class PlayersGroup {
         PlayerConfig pc = Lib.getPlayerConfig(member);
         pc.setPlayerType(post);
         pc.setCurrentGroup(this.getId());
+        PlayerProvider.setup(member.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
         DS.edit("id", this.id.toString(), PlayerGroupData.create(this), PlayerGroupData.class);
     }
@@ -151,6 +153,7 @@ public class PlayersGroup {
         String colored = LegacyComponentSerializer.legacySection().serialize(comp);
         member.setPlayerListName(colored);
 
+        PlayerProvider.setup(member.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
         DS.edit("id", this.id.toString(), PlayerGroupData.create(this), PlayerGroupData.class);
         return removed;
@@ -163,6 +166,7 @@ public class PlayersGroup {
 
         pending.forEach(pc -> {
             pc.requestGroup.removeIf(pre -> InPlayer.group(pre.getGroup()) == this);
+            PlayerProvider.setup(pc.id);
             DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
         });
 
