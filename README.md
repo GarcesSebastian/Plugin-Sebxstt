@@ -32,7 +32,7 @@
 
 ## Instalación
 
-1. Descarga el archivo `Sebxstt-1.0.jar` desde la página de releases.
+1. Descarga el archivo `Sebxstt-1.0.0.jar` desde la página de releases.
 2. Coloca el archivo `.jar` en la carpeta `plugins/` de tu servidor PaperMC.
 3. Reinicia el servidor. Se creará automáticamente la carpeta `plugins/Sebxstt/`.
 
@@ -42,10 +42,10 @@
 
 El plugin utiliza un archivo `config.yml` simple con los siguientes parámetros:
 ```yaml
-CooldownLastDeathCheckPoint: 1    # Tiempo de cooldown en minutos para el comando de retorno al último punto de muerte
+CooldownLastDeathCheckPoint: 1  # Tiempo de cooldown en minutos para el comando de retorno al último punto de muerte
 MaxCheckPoints: 3               # Número máximo de checkpoints que puede tener un jugador
-fileDataSaved: "data.json"      # Nombre del archivo de datos JSON
-AutoSaveTime: 5                # Intervalo de autoguardado en minutos
+fileDataSaved: "data"           # Nombre del archivo de datos
+AutoSaveTime: 5                 # Intervalo de autoguardado en minutos
 ```
 
 ---
