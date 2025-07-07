@@ -145,7 +145,7 @@ public class PlayersGroup {
         );
         PlayerConfig pc = Lib.getPlayerConfig(member);
         pc.setCurrentGroup(null);
-        pc.setPlayerType(PlayerTypeGroup.DENIED);
+        pc.setPlayerType(PlayerTypeGroup.NONE);
         PlayerProvider.setup(member.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
 

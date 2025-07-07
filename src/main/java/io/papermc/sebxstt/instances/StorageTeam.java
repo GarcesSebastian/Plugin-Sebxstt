@@ -1,5 +1,6 @@
 package io.papermc.sebxstt.instances;
 
+import io.papermc.sebxstt.helpers.GroupPermissions;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.functions.utils.Lib;
@@ -62,7 +63,7 @@ public class StorageTeam {
         PlayerConfig pc = Lib.getPlayerConfig(player);
         PlayerTypeGroup playerTypeGroup = pc.getPlayerType();
 
-        if (playerTypeGroup == PlayerTypeGroup.DENIED) {
+        if (!GroupPermissions.canOpenStorage(playerTypeGroup)) {
             player.sendMessage(mm.deserialize("<red><bold>Sin permiso:</bold> No tienes el cargo suficiente para hacer esta accion.</red>"));
             return;
         }

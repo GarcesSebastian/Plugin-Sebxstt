@@ -52,7 +52,7 @@ public class Suggest {
 
     public static SuggestionProvider<CommandSourceStack> PlayersTypeSuggestions() {
         return (ctx, builder) -> {
-            Arrays.stream(PlayerTypeGroup.values()).toList().forEach(playersGroup -> {
+            Arrays.stream(PlayerTypeGroup.values()).filter(p -> !p.equals(PlayerTypeGroup.LEADER) && !p.equals(PlayerTypeGroup.NONE)).toList().forEach(playersGroup -> {
                 builder.suggest(playersGroup.name().toLowerCase());
             });
 

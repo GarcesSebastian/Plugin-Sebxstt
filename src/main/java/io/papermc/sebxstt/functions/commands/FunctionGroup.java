@@ -2,6 +2,7 @@ package io.papermc.sebxstt.functions.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.sebxstt.helpers.GroupPermissions;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.functions.utils.Lib;
@@ -64,7 +65,7 @@ public class FunctionGroup {
             return;
         }
 
-        if (senderType != PlayerTypeGroup.CONTROLLER && senderType != PlayerTypeGroup.MANAGER) {
+        if (!GroupPermissions.canManagerMembers(senderType)) {
             p.sendMessage(mm.deserialize("<red><bold>Sin permiso:</bold> No tienes el cargo suficiente para hacer esta acción.</red>"));
             return;
         }
@@ -130,7 +131,7 @@ public class FunctionGroup {
         }
 
         pc.setCurrentGroup(grp.getId());
-        pc.setPlayerType(PlayerTypeGroup.MANAGER);
+        pc.setPlayerType(PlayerTypeGroup.LEADER);
 
         PlayerProvider.setup(p.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
@@ -204,6 +205,7 @@ public class FunctionGroup {
             p.sendMessage(mm.deserialize("<red><bold>Jugador no encontrado:</bold></red> <white>" + target + "</white>"));
             return;
         }
+
         PlayersGroup grp = Lib.FindPlayerInGroup(p.getName());
         if (grp == null) {
             p.sendMessage(mm.deserialize(
@@ -211,10 +213,15 @@ public class FunctionGroup {
             ));
             return;
         }
-        if (!p.getName().equals(InPlayer.name(grp.getOwner()))) {
-            p.sendMessage(mm.deserialize("<red><bold>Sin permiso</bold> Solo el dueño puede invitar</red>"));
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null) return;
+
+        if (!GroupPermissions.canManagerMembers(pc.getPlayerType())) {
+            p.sendMessage(mm.deserialize("<red><bold>Sin permiso:</bold> Solo el dueño puede invitar miembros.</red>"));
             return;
         }
+
         if (grp.getMembers().stream().anyMatch(m -> InPlayer.name(m).equals(target)) || InPlayer.name(grp.getOwner()).equals(target)) {
             p.sendMessage(mm.deserialize("<yellow>" + target + " ya es miembro</yellow>"));
             return;
@@ -241,6 +248,7 @@ public class FunctionGroup {
             p.sendMessage(mm.deserialize("<red><bold>Jugador no encontrado:</bold> " + target + "</red>"));
             return;
         }
+
         PlayersGroup grp = Lib.FindPlayerInGroup(p.getName());
         if (grp == null) {
             p.sendMessage(mm.deserialize(
@@ -248,23 +256,31 @@ public class FunctionGroup {
             ));
             return;
         }
-        if (!p.getName().equals(InPlayer.name(grp.getOwner()))) {
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null) return;
+
+        if (!GroupPermissions.canManagerMembers(pc.getPlayerType())) {
             p.sendMessage(mm.deserialize("<red><bold>Sin permiso:</bold> Solo el dueño puede sacar miembros.</red>"));
             return;
         }
+
         if (InPlayer.name(grp.getOwner()).equals(target)) {
             p.sendMessage(mm.deserialize("<yellow><bold>No puedes expulsar al dueño del grupo.</bold></yellow>"));
             return;
         }
+
         var members = grp.getMembers() != null ? grp.getMembers() : new ArrayList<UUID>();
         if (members.stream().noneMatch(m -> InPlayer.name(m).equals(target))) {
             p.sendMessage(mm.deserialize("<yellow>" + target + " no es miembro del grupo.</yellow>"));
             return;
         }
+
         grp.kickMember(kicked);
         p.sendMessage(mm.deserialize(
                 "<green>Expulsaste a <white><bold>" + target + "</bold></white> de <gold><bold>" + grp.getName() + "</bold></gold>.</green>"
         ));
+
         kicked.sendMessage(mm.deserialize(
                 "<red><bold>Has sido expulsado del grupo:</bold> <white>" + grp.getName() + "</white>\n" +
                         "<gold>Por:</gold> <white>" + p.getName() + "</white>"

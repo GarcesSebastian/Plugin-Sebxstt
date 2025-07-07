@@ -2,6 +2,7 @@ package io.papermc.sebxstt;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.sebxstt.helpers.GroupPermissions;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.instances.CheckPoint;
@@ -96,12 +97,7 @@ public class index extends JavaPlugin implements Listener {
             return;
         }
 
-        if (playerTypeGroup == PlayerTypeGroup.VIEWER) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (playerTypeGroup == PlayerTypeGroup.CONTROLLER) {
+        if (GroupPermissions.canEditStorage(playerTypeGroup)) {
             if (event.getClickedInventory() != null
                     && event.getClickedInventory().equals(event.getView().getTopInventory())) {
                 event.setCancelled(true);

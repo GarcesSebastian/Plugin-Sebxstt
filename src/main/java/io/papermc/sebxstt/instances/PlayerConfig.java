@@ -1,5 +1,6 @@
 package io.papermc.sebxstt.instances;
 
+import io.papermc.sebxstt.helpers.GroupPermissions;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.providers.ConfigurationProvider;
@@ -18,7 +19,7 @@ public class PlayerConfig {
     public UUID player;
     public UUID currentGroup;
     public ArrayList<RequestGroup> requestGroup = new ArrayList<>();
-    public PlayerTypeGroup playerType = PlayerTypeGroup.DENIED;
+    public PlayerTypeGroup playerType = PlayerTypeGroup.NONE;
     public boolean ChatEnabledGroup = false;
 
     public ArrayList<CheckPoint> checkPoints = new ArrayList<>();
@@ -48,10 +49,11 @@ public class PlayerConfig {
 
         String roleText;
         switch (this.playerType) {
-            case MANAGER -> roleText = "<gold>Manager</gold>";
-            case CONTROLLER -> roleText = "<blue>Controlador</blue>";
-            case VIEWER -> roleText = "<gray>Observador</gray>";
-            case DENIED -> roleText = "<dark_red>Denegado</dark_red>";
+            case LEADER -> roleText = "<gold>Lider</gold>";
+            case OFFICER -> roleText = "<blue>Oficial</blue>";
+            case MEMBER -> roleText = "<gray>Miembro</gray>";
+            case GUEST -> roleText = "<dark_red>Casual</dark_red>";
+            case NONE -> roleText = "<dark_red>Ninguno</dark_red>";
             default -> roleText = "<dark_gray>Desconocido</dark_gray>";
         }
 
@@ -200,7 +202,7 @@ public class PlayerConfig {
             gp.getStorage().setupContents();
         }
 
-        if (playerType == PlayerTypeGroup.DENIED) {
+        if (!GroupPermissions.canOpenStorage(playerType)) {
             StorageTeam storage = gp.getStorage();
             Inventory openInventory = p.getOpenInventory().getTopInventory();
 
