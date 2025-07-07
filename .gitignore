@@ -21,6 +21,8 @@ target/
 
 ## Enter with players memeber while owner off
 
+## QUITAR EXTENSION DEL FILESAVEDDATA
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml

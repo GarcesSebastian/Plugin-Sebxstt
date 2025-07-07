@@ -11,7 +11,9 @@ import io.papermc.sebxstt.instances.RequestGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -162,6 +164,28 @@ public class Lib {
         }
         
         return playerConfig;
+    }
+
+    public static void clearOrphanNameTags() {
+        int removed = 0;
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity e : world.getEntities()) {
+                if (e instanceof ArmorStand as) {
+                    if (as.isSmall() && as.isMarker() && as.isCustomNameVisible()) {
+                        as.remove();
+                        removed++;
+                    }
+                }
+            }
+        }
+        Bukkit.getLogger().info("[Sebxstt] Removed " + removed + " orphan ArmorStands.");
+    }
+
+    public static void removeCustomNameTag(Player player) {
+        ArmorStand as = nameTags.remove(player.getUniqueId());
+        if (as != null && !as.isDead()) {
+            as.remove();
+        }
     }
 
     public static void setCustomNameTag(Player target, String name, ChatColor color) {

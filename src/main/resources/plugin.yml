@@ -4,6 +4,7 @@ main: io.papermc.sebxstt.index
 description: Plugin Sebxstt
 author: Sebxstt
 api-version: '1.21.4'
+depend: [ProtocolLib]
 commands:
   group:
     description: Gestión de grupos
