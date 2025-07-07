@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class PluginProvider {
     public static String[] optionsInvitations = new String[] {"aceptar", "rechazar"};
+    public static String[] optionsStates = new String[] {"ON", "OFF"};
 
     private static JavaPlugin plugin;
 

@@ -7,6 +7,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.sebxstt.functions.commands.FunctionGroup;
 import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.functions.utils.Suggest;
+import io.papermc.sebxstt.providers.PluginProvider;
 
 public class CommandGroup {
     public static LiteralCommandNode<CommandSourceStack> build() {
@@ -22,6 +23,16 @@ public class CommandGroup {
                                             return 1;
                                         })
                                 )
+                        )
+                )
+                .then(Commands.literal("chat")
+                        .then(Commands.argument("estado", StringArgumentType.word())
+                                .suggests(Suggest.OptionsSuggestions(PluginProvider.optionsStates))
+                                .executes(ctx -> {
+                                    String state = ctx.getArgument("estado", String.class);
+                                    FunctionGroup.ChatStateGroup(ctx, state);
+                                    return 1;
+                                })
                         )
                 )
                 .then(Commands.literal("storage")

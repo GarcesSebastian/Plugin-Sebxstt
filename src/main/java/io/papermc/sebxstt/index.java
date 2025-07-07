@@ -137,6 +137,12 @@ public class index extends JavaPlugin implements Listener {
             );
         }
 
+        PlayerConfig pc = Lib.getPlayerConfig(player);
+
+        if (pc.getChatEnabledGroup()) {
+            player.sendMessage(mm.deserialize("<aqua>Tu chat grupal está <bold>activado</bold>. Usa <gold>/group chat off</gold> para desactivar.</aqua>"));
+        }
+
         if (grp != null) {
             grp.TargetMembers();
         }
@@ -195,6 +201,19 @@ public class index extends JavaPlugin implements Listener {
         String message = LegacyComponentSerializer.legacyAmpersand().serialize(event.message());
         var grp = Lib.FindPlayerInGroup(player.getName());
         event.setCancelled(true);
+
+        PlayerConfig pc = Lib.getPlayerConfig(player);
+        if (pc != null && pc.getChatEnabledGroup()) {
+            String color = grp.getColor().name().toLowerCase();
+            String msgRaw = "[Grupo: <" + color + ">" + grp.getName() + "</" + color + ">] "
+                    + "<gray>" + player.getName() + "</gray>: "
+                    + message;
+
+            for (Player p : grp.getPlayers()) {
+                p.sendMessage(mm.deserialize(msgRaw));
+            }
+            return;
+        }
 
         String output = "<white>" + player.getName() + "</white>";
 

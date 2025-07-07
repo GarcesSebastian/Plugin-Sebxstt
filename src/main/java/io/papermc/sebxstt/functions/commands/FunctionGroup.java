@@ -9,6 +9,7 @@ import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.StorageTeam;
 import io.papermc.sebxstt.providers.PlayerProvider;
+import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
 import net.kyori.adventure.text.Component;
@@ -17,6 +18,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static io.papermc.sebxstt.index.mainData;
@@ -299,5 +301,41 @@ public class FunctionGroup {
 
         StorageTeam storage = grp.getStorage();
         storage.open(p);
+    }
+
+    public static void ChatStateGroup(CommandContext<CommandSourceStack> ctx, String state) {
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        boolean isMatch = Arrays.stream(PluginProvider.optionsStates)
+                .anyMatch(op -> op.equalsIgnoreCase(state));
+        if (!isMatch) {
+            p.sendMessage(mm.deserialize(
+                    "<red>Opción inválida.</red>\n" +
+                            "<gray>Usa: </gray><gold>/group chat on|off</gold>"
+            ));
+            return;
+        }
+
+        PlayersGroup grp = Lib.FindPlayerInGroup(p.getName());
+        if (grp == null) {
+            p.sendMessage(mm.deserialize(
+                    "<red><bold>No perteneces a ningún grupo.</bold> Usa <yellow>/group create <color> <nombre></yellow>"
+            ));
+            return;
+        }
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null) return;
+
+        boolean enable = state.equalsIgnoreCase("ON");
+        pc.setChatEnabledGroup(enable);
+        DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
+
+        if (enable) {
+            p.sendMessage(mm.deserialize("<green>Chat de grupo <bold>activado</bold>.</green>"));
+        } else {
+            p.sendMessage(mm.deserialize("<yellow>Chat de grupo <bold>desactivado</bold>.</yellow>"));
+        }
     }
 }

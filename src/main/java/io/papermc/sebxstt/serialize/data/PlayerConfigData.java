@@ -15,6 +15,7 @@ public class PlayerConfigData {
     public String post;
     public UUID group;
     public List<RequestGroupData> requestGroup = new ArrayList<>();
+    public boolean ChatEnabledGroup = false;
 
     public ArrayList<CheckPointData> checkpoints = new ArrayList<>();
     public CheckPointData lastDeath;
@@ -26,6 +27,8 @@ public class PlayerConfigData {
 
         this.id = playerConfig.id;
         this.player = playerConfig.player;
+
+        this.ChatEnabledGroup = playerConfig.getChatEnabledGroup();
 
         if (playerConfig.getPlayerType() != null) {
             this.post = playerConfig.getPlayerType().toString().toLowerCase();
@@ -63,6 +66,7 @@ public class PlayerConfigData {
 
         PlayerConfig pc = new PlayerConfig(player);
         pc.setId(this.id);
+        pc.setChatEnabledGroup(ChatEnabledGroup);
 
         try {
             if (this.post != null) {

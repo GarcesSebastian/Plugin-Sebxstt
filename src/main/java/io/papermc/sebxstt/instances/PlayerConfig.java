@@ -19,6 +19,7 @@ public class PlayerConfig {
     public UUID currentGroup;
     public ArrayList<RequestGroup> requestGroup = new ArrayList<>();
     public PlayerTypeGroup playerType = PlayerTypeGroup.DENIED;
+    public boolean ChatEnabledGroup = false;
 
     public ArrayList<CheckPoint> checkPoints = new ArrayList<>();
     public CheckPoint lastDeath;
@@ -217,6 +218,10 @@ public class PlayerConfig {
         this.id = id;
     }
 
+    public void setChatEnabledGroup(boolean chatEnabledGroup) {
+        ChatEnabledGroup = chatEnabledGroup;
+    }
+
     public boolean getInvited() {
         return !this.requestGroup.isEmpty();
     }
@@ -243,5 +248,9 @@ public class PlayerConfig {
 
     public UUID getId() {
         return id;
+    }
+
+    public boolean getChatEnabledGroup() {
+        return this.ChatEnabledGroup;
     }
 }
