@@ -14,8 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -39,9 +37,8 @@ public class PlayersGroup {
 
     public ArrayList<PlayerConfig> pending = new ArrayList<>();
 
-    private final Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
+    private final Scoreboard main = Bukkit.getScoreboardManager().getMainScoreboard();
     private final Team team;
-    private final Objective sidebar;
 
     public PlayersGroup(String name, UUID owner, ChatColor color) {
         this.id = UUID.randomUUID();
@@ -50,52 +47,51 @@ public class PlayersGroup {
         this.color  = color;
         this.members = new ArrayList<>();
 
-        this.team = board.registerNewTeam(name);
+        String teamName = "grupo_" + this.id.toString().substring(0, 8);
+        Team temp = main.getTeam(teamName);
+        if (temp == null) {
+            temp = main.registerNewTeam(teamName);
+        }
+
+        this.team = temp;
+
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        team.setOption(Team.Option.COLLISION_RULE,      Team.OptionStatus.NEVER);
+        team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
         team.setColor(color);
-        team.setPrefix(color.toString());
 
         this.TargetMembers();
-
-        this.sidebar = board.registerNewObjective(name, "dummy", ChatColor.GOLD + "[Grupo: " + name + "]");
-        sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
-        this.updateSidebar();
 
         this.storage = new StorageTeam(18, this);
     }
 
     public void TargetMembers() {
-        for (String entry : new ArrayList<>(team.getEntries())) {
-            team.removeEntry(entry);
-        }
         for (Player p : getPlayers()) {
+            team.addEntry(p.getName());
+            p.setScoreboard(main);
+
             String output = "<gray>" + p.getName() + "</gray> [<" + this.getColor().name().toLowerCase() + ">" + this.getName() + "</" + this.getColor().name().toLowerCase() + ">]";
             Component comp = mm.deserialize(output);
             String colored = LegacyComponentSerializer.legacySection().serialize(comp);
             p.setPlayerListName(colored);
 
-            team.addEntry(p.getName());
             p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false, true));
-            p.setScoreboard(board);
         }
     }
 
     public void unTargetMembers() {
-        if (!board.getTeams().contains(team)) return;
-
-        for (String entry : new ArrayList<>(team.getEntries())) {
-            team.removeEntry(entry);
-        }
-
         for (Player p : getPlayers()) {
+            team.removeEntry(p.getName());
+
+            Lib.removeCustomNameTag(p);
+
             String output = "<white>" + p.getName() + "</white>";
             Component comp = mm.deserialize(output);
             String colored = LegacyComponentSerializer.legacySection().serialize(comp);
             p.setPlayerListName(colored);
 
             p.removePotionEffect(PotionEffectType.GLOWING);
-            p.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
+            PlayerProvider.setup(p.getUniqueId());
         }
     }
 
@@ -118,7 +114,6 @@ public class PlayersGroup {
     public void addMember(Player member, PlayerTypeGroup post) {
         this.members.add(member.getUniqueId());
         this.TargetMembers();
-        this.updateSidebar();
 
         if (this.storage != null) {
             this.storage.setupContents();
@@ -145,7 +140,6 @@ public class PlayersGroup {
 
         boolean removed = this.members.removeIf(m -> InPlayer.name(m).equals(member.getName()));
         this.TargetMembers();
-        this.updateSidebar();
         this.storage.setupContents();
 
         String output = "<white>" + member.getName() + "</white>";
@@ -161,19 +155,19 @@ public class PlayersGroup {
 
     public void disolve() {
         unTargetMembers();
-        hideSidebar();
-        if (board.getTeams().contains(team)) team.unregister();
 
-        pending.forEach(pc -> {
+        if (main.getTeam(team.getName()) != null) {
+            main.getTeam(team.getName()).unregister();
+        }
+
+        for (PlayerConfig pc : pending) {
             pc.requestGroup.removeIf(pre -> InPlayer.group(pre.getGroup()) == this);
             PlayerProvider.setup(pc.id);
             DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
-        });
+        }
+        pending.clear();
 
-        System.out.println("[PlayersGroup] Disolviendo el grupo " + this.name);
         mainData.playersGroups.remove(this);
-
-        System.out.println("[PlayersGroup] Guardando los datos despues de disolver el grupo " + this.name);
         DS.delete("id", this.id.toString(), PlayerGroupData.class);
     }
 
@@ -217,28 +211,6 @@ public class PlayersGroup {
         );
 
         executor.sendMessage(infoMessage);
-    }
-
-    public void updateSidebar() {
-        for (String entry : board.getEntries()) {
-            sidebar.getScore(entry).resetScore();
-        }
-        int score = getPlayers().size();
-        for (Player p : getPlayers()) {
-            ChatColor c = p.equals(owner) ? ChatColor.AQUA : ChatColor.WHITE;
-            sidebar.getScore(c + "- " + p.getName()).setScore(score--);
-        }
-        for (Player p : getPlayers()) {
-            p.setScoreboard(board);
-        }
-    }
-
-    public void hideSidebar() {
-        sidebar.unregister();
-        Scoreboard main = Bukkit.getScoreboardManager().getMainScoreboard();
-        for (Player p : getPlayers()) {
-            p.setScoreboard(main);
-        }
     }
 
     public UUID getId() {

@@ -21,7 +21,6 @@ import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Team;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -67,17 +66,12 @@ public class FunctionPlayer {
         var senderRaw = ctx.getSource().getSender();
         if (!(senderRaw instanceof Player p)) return;
 
-        var copy = new ArrayList<>(mainData.playersGroups);
+        ArrayList<PlayersGroup> copy = new ArrayList<>(mainData.playersGroups);
         for (PlayersGroup group : copy) {
             group.disolve();
         }
 
-        for (Team team : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
-            team.unregister();
-        }
-
-        mainData.playersGroups.clear();
-
+        Lib.clearOrphanNameTags();
         p.sendMessage(mm.deserialize("<green><bold>Todos los equipos han sido eliminados correctamente.</bold></green>"));
     }
 

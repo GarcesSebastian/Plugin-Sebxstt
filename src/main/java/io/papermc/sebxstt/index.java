@@ -33,6 +33,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Team;
 
 import static io.papermc.sebxstt.providers.DataStoreProvider.DS;
 
@@ -134,7 +135,6 @@ public class index extends JavaPlugin implements Listener {
 
         if (grp != null) {
             grp.TargetMembers();
-            grp.updateSidebar();
         }
     }
 
@@ -184,7 +184,6 @@ public class index extends JavaPlugin implements Listener {
 
             if (grp != null) {
                 grp.TargetMembers();
-                grp.updateSidebar();
             }
         }, 1L);
     }
