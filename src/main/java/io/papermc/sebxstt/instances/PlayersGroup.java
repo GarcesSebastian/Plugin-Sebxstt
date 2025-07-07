@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -81,16 +82,15 @@ public class PlayersGroup {
     public void unTargetMembers() {
         for (Player p : getPlayers()) {
             team.removeEntry(p.getName());
-
             Lib.removeCustomNameTag(p);
 
-            String output = "<white>" + p.getName() + "</white>";
-            Component comp = mm.deserialize(output);
-            String colored = LegacyComponentSerializer.legacySection().serialize(comp);
-            p.setPlayerListName(colored);
+            String plain = "<white>" + p.getName() + "</white>";
+            p.setPlayerListName(
+                    LegacyComponentSerializer.legacySection().serialize(mm.deserialize(plain))
+            );
 
             p.removePotionEffect(PotionEffectType.GLOWING);
-
+            p.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
             PlayerProvider.setup(p.getUniqueId());
         }
     }
@@ -129,45 +129,42 @@ public class PlayersGroup {
     }
 
     public boolean kickMember(Player member) {
-        Inventory openInventory = member.getOpenInventory().getTopInventory();
+        team.removeEntry(member.getName());
+        Lib.removeCustomNameTag(member);
+        member.removePotionEffect(PotionEffectType.GLOWING);
+        member.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
-        if (openInventory.equals(this.storage.instance)) {
-            member.closeInventory();
-        }
+        boolean removed = members.removeIf(id -> {
+            Player p = InPlayer.instance(id);
+            return p != null && p.getName().equals(member.getName());
+        });
 
+        String plain = "<white>" + member.getName() + "</white>";
+        member.setPlayerListName(
+                LegacyComponentSerializer.legacySection().serialize(mm.deserialize(plain))
+        );
         PlayerConfig pc = Lib.getPlayerConfig(member);
+        pc.setCurrentGroup(null);
         pc.setPlayerType(PlayerTypeGroup.DENIED);
-
-        boolean removed = this.members.removeIf(m -> InPlayer.name(m).equals(member.getName()));
-        this.TargetMembers();
-        this.storage.setupContents();
-
-        String output = "<white>" + member.getName() + "</white>";
-        Component comp = mm.deserialize(output);
-        String colored = LegacyComponentSerializer.legacySection().serialize(comp);
-        member.setPlayerListName(colored);
-
         PlayerProvider.setup(member.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
-        DS.edit("id", this.id.toString(), PlayerGroupData.create(this), PlayerGroupData.class);
+
         return removed;
     }
 
     public void disolve() {
+        mainData.playersGroups.remove(this);
+
         unTargetMembers();
 
-        if (main.getTeam(team.getName()) != null) {
-            main.getTeam(team.getName()).unregister();
-        }
-
-        for (PlayerConfig pc : pending) {
-            pc.requestGroup.removeIf(pre -> InPlayer.group(pre.getGroup()) == this);
-            PlayerProvider.setup(pc.id);
-            DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
-        }
+        members.clear();
         pending.clear();
 
-        mainData.playersGroups.remove(this);
+        Team t = main.getTeam(team.getName());
+        if (t != null) t.unregister();
+        Objective obj = main.getObjective(this.name);
+        if (obj != null) obj.unregister();
+
         DS.delete("id", this.id.toString(), PlayerGroupData.class);
     }
 
@@ -244,7 +241,6 @@ public class PlayersGroup {
     public void setOwner(UUID owner)        { this.owner = owner; }
     public void setMembers(ArrayList<UUID> m){ this.members = m; }
     public void setColor(ChatColor color)     { this.color = color; }
-
     public void setStorage(StorageTeam storage) {
         this.storage = storage;
     }

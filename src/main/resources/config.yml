@@ -1,4 +1,4 @@
 CooldownLastDeathCheckPoint: 1
 MaxCheckPoints: 3
-fileDataSaved: "data.json"
+fileDataSaved: "datastore"
 AutoSaveTime: 5

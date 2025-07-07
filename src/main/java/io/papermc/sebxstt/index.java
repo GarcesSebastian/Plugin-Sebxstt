@@ -67,6 +67,11 @@ public class index extends JavaPlugin implements Listener {
         for (PlayersGroup pg : mainData.playersGroups) {
             DS.edit("id", pg.id.toString(), PlayerGroupData.create(pg), PlayerGroupData.class);
         }
+
+        for (ArmorStand as : nameTags.values()) {
+            if (as != null) as.remove();
+        }
+        nameTags.clear();
     }
 
     @EventHandler
@@ -141,10 +146,7 @@ public class index extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        ArmorStand as = nameTags.remove(event.getPlayer().getUniqueId());
-        if (as != null && !as.isDead()) {
-            as.remove();
-        }
+        Lib.removeCustomNameTag(player);
 
         PlayerConfig pc = Lib.getPlayerConfig(player);
         if (pc == null) {

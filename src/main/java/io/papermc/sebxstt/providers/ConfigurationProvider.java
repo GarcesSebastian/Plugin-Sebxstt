@@ -15,7 +15,7 @@ public class ConfigurationProvider {
 
         CooldownLastDeathCheckPoint = config.getInt("CooldownLastDeathCheckPoint", 1);
         MaxCheckPoints = config.getInt("MaxCheckPoints", 3);
-        fileDataSaved = config.getString("fileDataSaved", "data.json");
+        fileDataSaved = config.getString("fileDataSaved", "data") + ".json";
         AutoSaveTime = config.getInt("AutoSaveTime", 5);
     }
 }
