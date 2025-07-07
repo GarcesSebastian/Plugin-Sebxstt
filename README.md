@@ -85,26 +85,27 @@ Existen 4 roles en el sistema de grupos:
 
 ### Comando Group
 
-| Comando | Descripción | Requisitos |
-|---------|-------------|------------|
-| `/group create <nombre> <color>` | Crea un nuevo grupo | `sebxstt.command.group` |
-| `/group storage` | Abre el inventario compartido del grupo | Miembro de grupo |
-| `/group info [grupo]` | Muestra información sobre tu grupo o uno especificado | `sebxstt.command.group` |
-| `/group post <jugador> <cargo>` | Cambia el cargo de un miembro | MANAGER/CONTROLLER |
-| `/group leave` | Abandona tu grupo actual | Miembro de grupo |
-| `/group invite <jugador>` | Invita a un jugador a tu grupo | MANAGER/CONTROLLER |
-| `/group kick <jugador>` | Expulsa a un jugador de tu grupo | MANAGER/CONTROLLER |
-| `/group disband` | Disuelve el grupo | Solo MANAGER |
+| Comando                       | Descripción                         | Requisitos |
+|-------------------------------|-------------------------------------|------------|
+| `/group create <nombre> <color>` | Crea un nuevo grupo                 | `sebxstt.command.group` |
+| `/group chat`                 | Activar o desactivar el chat grupal | Miembro de grupo |
+| `/group storage`              | Abre el inventario compartido del grupo | Miembro de grupo |
+| `/group info [grupo]`         | Muestra información sobre tu grupo o uno especificado | `sebxstt.command.group` |
+| `/group post <jugador> <cargo>` | Cambia el cargo de un miembro       | MANAGER/CONTROLLER |
+| `/group leave`                | Abandona tu grupo actual            | Miembro de grupo |
+| `/group invite <jugador>`     | Invita a un jugador a tu grupo      | MANAGER/CONTROLLER |
+| `/group kick <jugador>`       | Expulsa a un jugador de tu grupo    | MANAGER/CONTROLLER |
+| `/group disband`              | Disuelve el grupo                   | Solo MANAGER |
 
 ### Comando Player
 
 | Comando | Descripción | Permisos |
 |---------|-------------|----------|
-| `/player test` | Comando de prueba | `sebxstt.command.player` |
-| `/player stats` o `/est` | Muestra estadísticas del jugador | `sebxstt.command.player` |
-| `/player clearteams` | Limpia equipos del jugador | `sebxstt.command.player` |
-| `/player return` | Te teletransporta a tu último punto de muerte | `sebxstt.command.player` |
-| `/player invitations` o `/player inv` | Muestra invitaciones pendientes a grupos | `sebxstt.command.player` |
+| `/test` | Comando de prueba | `sebxstt.command.player` |
+| `/stats` o `/est` | Muestra estadísticas del jugador | `sebxstt.command.player` |
+| `/clearteams` | Limpia equipos del jugador | `sebxstt.command.player` |
+| `/return` | Te teletransporta a tu último punto de muerte | `sebxstt.command.player` |
+| `/invitations` o `/inv` | Muestra invitaciones pendientes a grupos | `sebxstt.command.player` |
 
 ---
 
