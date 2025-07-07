@@ -2,7 +2,7 @@ package io.papermc.sebxstt;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import io.papermc.sebxstt.enums.PlayerTypeGroup;
+import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.instances.CheckPoint;
 import io.papermc.sebxstt.instances.Main;
@@ -33,7 +33,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.Team;
 
 import static io.papermc.sebxstt.providers.DataStoreProvider.DS;
 
@@ -203,15 +202,6 @@ public class index extends JavaPlugin implements Listener {
         }
 
         Bukkit.broadcast(mm.deserialize(output + ": " + message));
-    }
-
-    @EventHandler
-    public void onEntityDamage(EntityDamageByEntityEvent event) {
-        var player = event.getEntity();
-        var damage = event.getFinalDamage();
-        if(player instanceof Player) {
-            player.sendMessage(Component.text("Paisano te cacharon, y te quitaron " + Math.floor(damage)));
-        }
     }
 
     @EventHandler

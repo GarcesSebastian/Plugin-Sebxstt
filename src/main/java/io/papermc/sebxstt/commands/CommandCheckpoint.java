@@ -5,7 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.sebxstt.functions.commands.FunctionCheckPoint;
-import io.papermc.sebxstt.functions.utils.Lib;
+import io.papermc.sebxstt.functions.utils.Suggest;
 
 public class CommandCheckpoint {
     public static LiteralCommandNode<CommandSourceStack> build() {
@@ -25,7 +25,7 @@ public class CommandCheckpoint {
                 )
                 .then(Commands.literal("delete")
                         .then(Commands.argument("name", StringArgumentType.greedyString())
-                                .suggests(Lib.CheckPointsSuggestions())
+                                .suggests(Suggest.CheckPointsSuggestions())
                                 .executes(ctx -> {
                                     String name = ctx.getArgument("name", String.class);
                                     FunctionCheckPoint.DeleteCheckPoint(ctx, name);
@@ -35,7 +35,7 @@ public class CommandCheckpoint {
                 )
                 .then(Commands.literal("teleport")
                         .then(Commands.argument("name", StringArgumentType.greedyString())
-                                .suggests(Lib.CheckPointsSuggestions())
+                                .suggests(Suggest.CheckPointsSuggestions())
                                 .executes(ctx -> {
                                     String name = ctx.getArgument("name", String.class);
                                     FunctionCheckPoint.CheckPoint(ctx, name);

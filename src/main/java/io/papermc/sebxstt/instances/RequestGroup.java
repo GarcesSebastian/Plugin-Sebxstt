@@ -1,7 +1,6 @@
 package io.papermc.sebxstt.instances;
 
-import io.papermc.sebxstt.enums.PlayerTypeGroup;
-import org.bukkit.entity.Player;
+import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 
 import java.util.UUID;
 

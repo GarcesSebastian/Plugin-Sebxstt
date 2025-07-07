@@ -6,13 +6,14 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.sebxstt.functions.commands.FunctionGroup;
 import io.papermc.sebxstt.functions.utils.Lib;
+import io.papermc.sebxstt.functions.utils.Suggest;
 
 public class CommandGroup {
     public static LiteralCommandNode<CommandSourceStack> build() {
         return Commands.literal("group")
                 .then(Commands.literal("create")
                         .then(Commands.argument("color", StringArgumentType.word())
-                                .suggests(Lib.ColorSuggestions())
+                                .suggests(Suggest.ColorSuggestions())
                                 .then(Commands.argument("nombre", StringArgumentType.greedyString())
                                         .executes(ctx -> {
                                             String name = ctx.getArgument("nombre", String.class);
@@ -37,9 +38,9 @@ public class CommandGroup {
                 )
                 .then(Commands.literal("post")
                         .then(Commands.argument("cargo", StringArgumentType.word())
-                                .suggests(Lib.PlayersTypeSuggestions())
+                                .suggests(Suggest.PlayersTypeSuggestions())
                                 .then(Commands.argument("jugador", StringArgumentType.greedyString())
-                                        .suggests(Lib.PlayersSuggestionsTeam())
+                                        .suggests(Suggest.PlayersSuggestionsTeam())
                                         .executes(ctx -> {
                                             String target = ctx.getArgument("jugador", String.class);
                                             String cargo = ctx.getArgument("cargo", String.class);
@@ -57,9 +58,9 @@ public class CommandGroup {
                 )
                 .then(Commands.literal("invite")
                         .then(Commands.argument("cargo", StringArgumentType.word())
-                                .suggests(Lib.PlayersTypeSuggestions())
+                                .suggests(Suggest.PlayersTypeSuggestions())
                                 .then(Commands.argument("jugador", StringArgumentType.greedyString())
-                                        .suggests(Lib.PlayersSuggestions())
+                                        .suggests(Suggest.PlayersSuggestions())
                                         .executes(ctx -> {
                                             String target = ctx.getArgument("jugador", String.class);
                                             String cargo = ctx.getArgument("cargo", String.class);
@@ -71,7 +72,7 @@ public class CommandGroup {
                 )
                 .then(Commands.literal("kick")
                         .then(Commands.argument("jugador", StringArgumentType.greedyString())
-                                .suggests(Lib.PlayersSuggestionsTeam())
+                                .suggests(Suggest.PlayersSuggestionsTeam())
                                 .executes(ctx -> {
                                     String target = ctx.getArgument("jugador", String.class);
                                     FunctionGroup.KickGroup(ctx, target);

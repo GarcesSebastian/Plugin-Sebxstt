@@ -2,7 +2,7 @@ package io.papermc.sebxstt.functions.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.sebxstt.enums.PlayerTypeGroup;
+import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.instances.PlayerConfig;

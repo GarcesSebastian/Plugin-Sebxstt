@@ -1,4 +1,4 @@
-package io.papermc.sebxstt.enums;
+package io.papermc.sebxstt.instances.enums;
 
 public enum PlayerTypeGroup {
     MANAGER,

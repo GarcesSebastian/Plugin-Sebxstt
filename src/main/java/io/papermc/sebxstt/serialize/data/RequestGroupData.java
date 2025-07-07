@@ -1,6 +1,6 @@
 package io.papermc.sebxstt.serialize.data;
 
-import io.papermc.sebxstt.enums.PlayerTypeGroup;
+import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.RequestGroup;

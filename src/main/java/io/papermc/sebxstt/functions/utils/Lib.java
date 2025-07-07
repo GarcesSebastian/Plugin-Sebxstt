@@ -1,13 +1,7 @@
 package io.papermc.sebxstt.functions.utils;
 
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-
-import io.papermc.sebxstt.enums.PlayerTypeGroup;
-import io.papermc.sebxstt.instances.CheckPoint;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
-import io.papermc.sebxstt.instances.RequestGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -27,92 +21,6 @@ import java.util.*;
 import static io.papermc.sebxstt.index.*;
 
 public class Lib {
-    public static SuggestionProvider<CommandSourceStack> ColorSuggestions() {
-        return (ctx, builder) -> {
-            Arrays.stream(ChatColor.values())
-                    .filter(ChatColor::isColor)
-                    .map(c -> c.name().toLowerCase())
-                    .forEach(c -> {
-                        builder.suggest(c);
-                    });
-
-            return builder.buildFuture();
-        };
-    }
-
-    public static SuggestionProvider<CommandSourceStack> PlayersSuggestions() {
-        return (ctx, builder) -> {
-            String name = ctx.getSource().getSender().getName();
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getName().equals(name)) continue;
-                builder.suggest(player.getName());
-            }
-            return builder.buildFuture();
-        };
-    }
-
-    public static SuggestionProvider<CommandSourceStack> PlayersSuggestionsTeam() {
-        return (ctx, builder) -> {
-            String name = ctx.getSource().getSender().getName();
-            PlayersGroup team = Lib.FindPlayerInGroup(name);
-            for (Player member : team.getPlayers()) {
-                if (member.getName().equals(name)) continue;
-                builder.suggest(member.getName());
-            }
-            return builder.buildFuture();
-        };
-    }
-
-    public static SuggestionProvider<CommandSourceStack> PlayersTypeSuggestions() {
-        return (ctx, builder) -> {
-            Arrays.stream(PlayerTypeGroup.values()).toList().forEach(playersGroup -> {
-                builder.suggest(playersGroup.name().toLowerCase());
-            });
-
-            return builder.buildFuture();
-        };
-    }
-
-    public static SuggestionProvider<CommandSourceStack> CheckPointsSuggestions() {
-        return (ctx, builder) -> {
-            var senderRaw = ctx.getSource().getSender();
-            Player p = (Player) senderRaw;
-            PlayerConfig pc = Lib.getPlayerConfig(p);
-
-            for (CheckPoint cp : pc.getCheckPoints()) {
-                builder.suggest(cp.getName());
-            }
-            return builder.buildFuture();
-        };
-    }
-
-    public static SuggestionProvider<CommandSourceStack> RequestTeamSuggestions() {
-        return (ctx, builder) -> {
-            var senderRaw = ctx.getSource().getSender();
-            Player p = (Player) senderRaw;
-            PlayerConfig pc = Lib.getPlayerConfig(p);
-            if (pc == null) {
-                throw new RuntimeException("Player not found");
-            }
-
-            for (RequestGroup requestGroup : pc.getRequestGroup()) {
-                builder.suggest(InPlayer.group(requestGroup.getGroup()).getName());
-            }
-
-            return builder.buildFuture();
-        };
-    }
-
-    public static SuggestionProvider<CommandSourceStack> OptionsSuggestions(String[] options) {
-        return (ctx, builder) -> {
-            Arrays.stream(options).forEach(option -> {
-                builder.suggest(option);
-            });
-
-            return builder.buildFuture();
-        };
-    }
-
     public static void ChooseGroupColor(Player p) {
         StringBuilder sb = new StringBuilder("Elige un color: ");
         for (ChatColor c : ChatColor.values()) {

@@ -3,8 +3,8 @@ package io.papermc.sebxstt.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.sebxstt.functions.commands.FunctionPlayer;
-import io.papermc.sebxstt.functions.utils.Lib;
-import io.papermc.sebxstt.helpers.ReturnCommand;
+import io.papermc.sebxstt.functions.utils.Suggest;
+import io.papermc.sebxstt.functions.utils.ReturnCommand;
 import io.papermc.sebxstt.providers.PluginProvider;
 
 import java.util.List;
@@ -48,9 +48,9 @@ public class CommandPlayer {
         cmds.register(
                 Commands.literal("invitations")
                         .then(Commands.argument("option", StringArgumentType.word())
-                                .suggests(Lib.OptionsSuggestions(PluginProvider.optionsInvitations))
+                                .suggests(Suggest.OptionsSuggestions(PluginProvider.optionsInvitations))
                                 .then(Commands.argument("equipos", StringArgumentType.greedyString())
-                                        .suggests(Lib.RequestTeamSuggestions())
+                                        .suggests(Suggest.RequestTeamSuggestions())
                                         .executes(ctx -> {
                                             String name = ctx.getArgument("equipos", String.class);
                                             String option  = ctx.getArgument("option", String.class);

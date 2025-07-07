@@ -1,4 +1,4 @@
-package io.papermc.sebxstt.helpers;
+package io.papermc.sebxstt.functions.utils;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;

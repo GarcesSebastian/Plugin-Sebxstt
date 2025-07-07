@@ -1,10 +1,9 @@
 package io.papermc.sebxstt.instances;
 
-import io.papermc.sebxstt.enums.PlayerTypeGroup;
+import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.providers.ConfigurationProvider;
 import io.papermc.sebxstt.providers.PluginProvider;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
