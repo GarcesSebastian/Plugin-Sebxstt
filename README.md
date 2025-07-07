@@ -1,4 +1,4 @@
-# Sebxstt - Documentación Completa
+# Sebxstt
 
 ¡Bienvenido a la documentación de **Sebxstt**! Este es un plugin para PaperMC que implementa sistemas de checkpoints y grupos, permitiendo a los jugadores crear puntos de teletransporte y gestionar equipos con diferentes roles.
 
