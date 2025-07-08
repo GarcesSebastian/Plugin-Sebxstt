@@ -70,7 +70,7 @@ public class FunctionPlayer {
 
         ArrayList<PlayersGroup> copy = new ArrayList<>(mainData.playersGroups);
         for (PlayersGroup group : copy) {
-            group.disolve();
+            group.dissolve();
         }
 
         Lib.clearOrphanNameTags();

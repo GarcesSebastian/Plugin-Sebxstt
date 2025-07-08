@@ -1,10 +1,9 @@
 package io.papermc.sebxstt.serialize.data;
 
-import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
+import io.papermc.sebxstt.instances.WarpPoint;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class PlayerGroupData {
 
     public List<PlayerGroupData> enemies = new ArrayList<>();
     public List<PlayerGroupData> allies = new ArrayList<>();
-
+    public List<WarpPointData> warpPoints = new ArrayList<>();
     public List<PlayerConfigData> pending = new ArrayList<>();
 
     public PlayerGroupData() {}
@@ -44,6 +43,14 @@ public class PlayerGroupData {
 
         if (group.getMembers() != null) {
             this.members = new ArrayList<>(group.getMembers());
+        }
+
+        if (group.getWarpPoints() != null) {
+            for (WarpPoint wp : group.getWarpPoints()) {
+                if (wp != null) {
+                    this.warpPoints.add(WarpPointData.create(wp));
+                }
+            }
         }
 
         if (group.allies != null) {
@@ -99,6 +106,14 @@ public class PlayerGroupData {
 
         if (storage != null) {
             group.setStorage(storage.resolve(group));
+        }
+
+        if (warpPoints != null) {
+            for (WarpPointData wpd : warpPoints) {
+                if (wpd != null) {
+                    group.getWarpPoints().add(wpd.resolve());
+                }
+            }
         }
 
         if (this.enemies != null) {

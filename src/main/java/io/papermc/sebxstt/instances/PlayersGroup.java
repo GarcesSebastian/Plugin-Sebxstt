@@ -11,7 +11,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Objective;
@@ -35,7 +34,7 @@ public class PlayersGroup {
 
     public ArrayList<PlayersGroup> enemies = new ArrayList<>();
     public ArrayList<PlayersGroup> allies = new ArrayList<>();
-
+    public ArrayList<WarpPoint> warpPoints = new ArrayList<>();
     public ArrayList<PlayerConfig> pending = new ArrayList<>();
 
     private final Scoreboard main = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -65,52 +64,6 @@ public class PlayersGroup {
         this.storage = new StorageTeam(18, this);
     }
 
-    public void TargetMembers() {
-        for (Player p : getPlayers()) {
-            team.addEntry(p.getName());
-            p.setScoreboard(main);
-
-            String output = "<gray>" + p.getName() + "</gray> [<" + this.getColor().name().toLowerCase() + ">" + this.getName() + "</" + this.getColor().name().toLowerCase() + ">]";
-            Component comp = mm.deserialize(output);
-            String colored = LegacyComponentSerializer.legacySection().serialize(comp);
-            p.setPlayerListName(colored);
-
-            p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false, true));
-        }
-    }
-
-    public void unTargetMembers() {
-        for (Player p : getPlayers()) {
-            team.removeEntry(p.getName());
-            Lib.removeCustomNameTag(p);
-
-            String plain = "<white>" + p.getName() + "</white>";
-            p.setPlayerListName(
-                    LegacyComponentSerializer.legacySection().serialize(mm.deserialize(plain))
-            );
-
-            p.removePotionEffect(PotionEffectType.GLOWING);
-            p.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-            PlayerProvider.setup(p.getUniqueId());
-        }
-    }
-
-    public void sendInvitation(Player invited, Player invitator, PlayerTypeGroup cargo) {
-        for (PlayerConfig pc : mainData.playerConfigs){
-            if(!(InPlayer.instance(pc.player) instanceof Player p)) return;
-            if(!p.getName().equalsIgnoreCase(invited.getName())) continue;
-            RequestGroup requestGroup = new RequestGroup(invited.getUniqueId(), invitator.getUniqueId(), this, cargo);
-
-            PlayerConfig pcInvited = Lib.getPlayerConfig(invited);
-            pcInvited.invitate(requestGroup);
-            this.pending.add(pcInvited);
-            DS.edit("id", pc.id.toString(), PlayerConfigData.create(pcInvited), PlayerConfigData.class);
-            break;
-        }
-
-        DS.edit("id", this.id.toString(), PlayerGroupData.create(this), PlayerGroupData.class);
-    }
-
     public void addMember(Player member, PlayerTypeGroup post) {
         this.members.add(member.getUniqueId());
         this.TargetMembers();
@@ -128,13 +81,13 @@ public class PlayersGroup {
         DS.edit("id", this.id.toString(), PlayerGroupData.create(this), PlayerGroupData.class);
     }
 
-    public boolean kickMember(Player member) {
+    public void kickMember(Player member) {
         team.removeEntry(member.getName());
         Lib.removeCustomNameTag(member);
         member.removePotionEffect(PotionEffectType.GLOWING);
         member.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
-        boolean removed = members.removeIf(id -> {
+        members.removeIf(id -> {
             Player p = InPlayer.instance(id);
             return p != null && p.getName().equals(member.getName());
         });
@@ -148,11 +101,9 @@ public class PlayersGroup {
         pc.setPlayerType(PlayerTypeGroup.NONE);
         PlayerProvider.setup(member.getUniqueId());
         DS.edit("id", pc.id.toString(), PlayerConfigData.create(pc), PlayerConfigData.class);
-
-        return removed;
     }
 
-    public void disolve() {
+    public void dissolve() {
         mainData.playersGroups.remove(this);
 
         unTargetMembers();
@@ -166,6 +117,22 @@ public class PlayersGroup {
         if (obj != null) obj.unregister();
 
         DS.delete("id", this.id.toString(), PlayerGroupData.class);
+    }
+
+    public void sendInvitation(Player invited, Player invitator, PlayerTypeGroup cargo) {
+        for (PlayerConfig pc : mainData.playerConfigs){
+            if(!(InPlayer.instance(pc.player) instanceof Player p)) return;
+            if(!p.getName().equalsIgnoreCase(invited.getName())) continue;
+            RequestGroup requestGroup = new RequestGroup(invited.getUniqueId(), invitator.getUniqueId(), this, cargo);
+
+            PlayerConfig pcInvited = Lib.getPlayerConfig(invited);
+            pcInvited.invitate(requestGroup);
+            this.pending.add(pcInvited);
+            DS.edit("id", pc.id.toString(), PlayerConfigData.create(pcInvited), PlayerConfigData.class);
+            break;
+        }
+
+        DS.edit("id", this.id.toString(), PlayerGroupData.create(this), PlayerGroupData.class);
     }
 
     public void showInfo(Player executor) {
@@ -210,6 +177,36 @@ public class PlayersGroup {
         executor.sendMessage(infoMessage);
     }
 
+    public void TargetMembers() {
+        for (Player p : getPlayers()) {
+            team.addEntry(p.getName());
+            p.setScoreboard(main);
+
+            String output = "<gray>" + p.getName() + "</gray> [<" + this.getColor().name().toLowerCase() + ">" + this.getName() + "</" + this.getColor().name().toLowerCase() + ">]";
+            Component comp = mm.deserialize(output);
+            String colored = LegacyComponentSerializer.legacySection().serialize(comp);
+            p.setPlayerListName(colored);
+
+            p.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 0, false, false, true));
+        }
+    }
+
+    public void unTargetMembers() {
+        for (Player p : getPlayers()) {
+            team.removeEntry(p.getName());
+            Lib.removeCustomNameTag(p);
+
+            String plain = "<white>" + p.getName() + "</white>";
+            p.setPlayerListName(
+                    LegacyComponentSerializer.legacySection().serialize(mm.deserialize(plain))
+            );
+
+            p.removePotionEffect(PotionEffectType.GLOWING);
+            p.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            PlayerProvider.setup(p.getUniqueId());
+        }
+    }
+
     public UUID getId() {
         return id;
     }
@@ -233,15 +230,20 @@ public class PlayersGroup {
         }
         return list;
     }
+    public ArrayList<WarpPoint> getWarpPoints() {
+        return warpPoints;
+    }
 
     public void setId(UUID id) {
         this.id = id;
     }
     public void setName(String name)          { this.name = name; }
     public void setOwner(UUID owner)        { this.owner = owner; }
-    public void setMembers(ArrayList<UUID> m){ this.members = m; }
     public void setColor(ChatColor color)     { this.color = color; }
     public void setStorage(StorageTeam storage) {
         this.storage = storage;
+    }
+    public void setWarpPoints(ArrayList<WarpPoint> warpPoints) {
+        this.warpPoints = warpPoints;
     }
 }

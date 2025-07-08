@@ -60,6 +60,21 @@ public class Suggest {
         };
     }
 
+    public static SuggestionProvider<CommandSourceStack> WarpPointSuggestions() {
+        return (ctx, builder) -> {
+            String name = ctx.getSource().getSender().getName();
+            PlayersGroup team = Lib.FindPlayerInGroup(name);
+
+            if (team != null) {
+                team.getWarpPoints().forEach(wp -> {
+                    builder.suggest(wp.name.toLowerCase());
+                });
+            }
+
+            return builder.buildFuture();
+        };
+    }
+
     public static SuggestionProvider<CommandSourceStack> CheckPointsSuggestions() {
         return (ctx, builder) -> {
             var senderRaw = ctx.getSource().getSender();

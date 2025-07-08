@@ -60,6 +60,7 @@ public class Lib {
     }
 
     public static PlayerConfig getPlayerConfig(Player player) {
+        if (player == null) return null;
         PlayerConfig playerConfig = null;
         
         for (PlayerConfig pc : mainData.PlayerConfigs()) {

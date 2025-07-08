@@ -16,15 +16,15 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 **Flujo de implementación final:**
 
-1. Comando `/group chat on|off` activa o desactiva el estado de chat grupal del jugador.
+1. Comando `/gchat on|off` activa o desactiva el estado de chat grupal del jugador.
 2. Este estado se almacena en la propiedad persistente `ChatEnabledGroup` dentro de `PlayerConfig` y se serializa correctamente en `PlayerConfigData`.
 3. El evento `AsyncChatEvent` detecta si el jugador tiene el chat grupal activado:
-    - Si está activado, el evento se cancela.
-    - El mensaje se envía exclusivamente a los miembros del grupo.
-    - El formato utilizado es:  
-      `"[Grupo: <color>NombreGrupo</color>] <gray>Jugador</gray>: Mensaje"`
+   - Si está activado, el evento se cancela.
+   - El mensaje se envía exclusivamente a los miembros del grupo.
+   - El formato utilizado es:  
+     `"[Grupo: <color>NombreGrupo</color>] <gray>Jugador</gray>: Mensaje"`
 4. El estado se restaura automáticamente al reconectar, con una notificación visual al jugador.
-5. La implementación es compatible con el sistema de colores y MiniMessage.
+5. El comando actual registrado para esto es `/gchat`, y se recomienda también el alias corto `gc`.
 
 **Pros:**
 
@@ -40,17 +40,21 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 ---
 
-## 2. Warps de Grupo
+## ✅ 2. Warps de Grupo (Implementado)
 
 **Objetivo:** Permitir que los grupos establezcan y usen puntos de teletransporte compartidos.
 
-**Flujo de implementación:**
+**Estado:** ✅ Ya implementado.
 
-1. Comando `/g setwarp <nombre>` para registrar una ubicación actual del jugador como warp.
-2. Guardar los warps en el objeto del grupo (`PlayersGroup`) con nombre, posición y fecha de creación.
-3. Comando `/g warp <nombre>` para teletransportarse.
-4. Comando `/g warps` para listar todos los warps disponibles del grupo.
-5. Comando `/g delwarp <nombre>` para eliminar un warp.
+**Flujo de implementación final:**
+
+1. Comando `/gwarp create <warp>`: crea un nuevo warp grupal en la ubicación actual del jugador.
+2. Comando `/gwarp delete <warp>`: elimina un warp existente del grupo.
+3. Comando `/gwarp list`: muestra todos los warps disponibles para el grupo.
+4. Comando `/gwarp tp <warp>`: teletransporta al jugador que ejecuta el comando al warp especificado.
+5. Comando `/gwarp all <warp>`: teletransporta a **todos los miembros del grupo** al warp.
+6. Comando `/gwarp post <cargo> <warp>`: teletransporta **solo a los miembros con un cargo específico** al warp.
+7. Comando registrado como `/gwarp`, con alias corto sugerido: `gwp`.
 
 **Pros:**
 
@@ -137,6 +141,38 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 - Alto nivel de desarrollo técnico (balanceo, IA, recompensas).
 - Requiere control de exploits y zonas protegidas.
 - Necesario sistema de cooldowns o límites de participación.
+
+---
+
+## 6. Menú Interactivo de Grupo (GUI In-Game)
+
+**Objetivo:** Ofrecer a los jugadores una manera rápida, accesible y visual de gestionar su grupo sin necesidad de escribir comandos manualmente.
+
+**Flujo de implementación propuesto:**
+
+1. Comando principal: `/gmenu` o `/group menu`.
+2. Al ejecutarlo, se abre un **menú tipo cofre** (Inventario GUI) con distintas secciones:
+   - 📜 **Información del Grupo**: muestra nombre, color, fundación y miembros.
+   - 🎭 **Gestión de Miembros**: invitar, kickear o cambiar cargos con clicks.
+   - 🚪 **Warps del Grupo**: listado de warps disponibles y acceso rápido a cada uno.
+   - ✉️ **Invitaciones Pendientes**: ver solicitudes enviadas/recibidas.
+   - ⚙️ **Configuraciones**: cambiar chat, color del grupo o disolverlo.
+3. Cada sección puede abrir submenús más detallados si es necesario.
+4. Toda la interacción se realiza con clicks, evitando comandos largos.
+5. Se implementa con `Inventory`, `ItemStack`, `ClickEvent`, y listeners propios.
+
+**Pros:**
+
+- Experiencia intuitiva para usuarios Bedrock/mobile.
+- Reduce la necesidad de recordar comandos complejos.
+- Estéticamente atractivo y profesional.
+- Permite ampliar funciones en el futuro de forma modular.
+
+**Contras:**
+
+- Requiere un sistema robusto de manejo de menús y eventos de click.
+- Aumenta la necesidad de sincronización entre menú e información persistente.
+- Necesario considerar restricciones de acceso por rol (ej. no todos pueden kickear/invitar).
 
 ---
 

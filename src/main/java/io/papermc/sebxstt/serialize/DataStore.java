@@ -7,6 +7,7 @@ import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.MainData;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
+import io.papermc.sebxstt.serialize.data.WarpPointData;
 
 import java.io.File;
 import java.util.ArrayList;

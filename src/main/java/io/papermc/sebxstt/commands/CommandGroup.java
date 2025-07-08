@@ -1,18 +1,16 @@
 package io.papermc.sebxstt.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.sebxstt.functions.commands.FunctionGroup;
-import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.functions.utils.Suggest;
 import io.papermc.sebxstt.providers.PluginProvider;
 
+import java.util.List;
+
 public class CommandGroup {
-    public static LiteralCommandNode<CommandSourceStack> build() {
-        return Commands.literal("group")
-                .then(Commands.literal("create")
+    public static void build(Commands cmds) {
+        cmds.register(Commands.literal("gcreate")
                         .then(Commands.argument("color", StringArgumentType.word())
                                 .suggests(Suggest.ColorSuggestions())
                                 .then(Commands.argument("nombre", StringArgumentType.greedyString())
@@ -23,9 +21,12 @@ public class CommandGroup {
                                             return 1;
                                         })
                                 )
-                        )
-                )
-                .then(Commands.literal("chat")
+                        ).build(),
+                "Crea un nuevo grupo con un nombre y color",
+                List.of("gc")
+        );
+
+        cmds.register(Commands.literal("gchat")
                         .then(Commands.argument("estado", StringArgumentType.word())
                                 .suggests(Suggest.OptionsSuggestions(PluginProvider.optionsStates))
                                 .executes(ctx -> {
@@ -33,21 +34,30 @@ public class CommandGroup {
                                     FunctionGroup.ChatStateGroup(ctx, state);
                                     return 1;
                                 })
-                        )
-                )
-                .then(Commands.literal("storage")
+                        ).build(),
+                "Activa o desactiva el chat de grupo privado",
+                List.of("ch")
+        );
+
+        cmds.register(Commands.literal("gstorage")
                         .executes(ctx -> {
                             FunctionGroup.ShowStorage(ctx);
                             return 1;
-                        })
-                )
-                .then(Commands.literal("info")
+                        }).build(),
+                "Abre el almacenamiento compartido del grupo",
+                List.of("st")
+        );
+
+        cmds.register(Commands.literal("ginfo")
                         .executes(ctx -> {
                             FunctionGroup.PreviewGroup(ctx);
                             return 1;
-                        })
-                )
-                .then(Commands.literal("post")
+                        }).build(),
+                "Muestra la información actual del grupo",
+                List.of("gi")
+        );
+
+        cmds.register(Commands.literal("grole")
                         .then(Commands.argument("cargo", StringArgumentType.word())
                                 .suggests(Suggest.PlayersTypeSuggestions())
                                 .then(Commands.argument("jugador", StringArgumentType.greedyString())
@@ -59,15 +69,21 @@ public class CommandGroup {
                                             return 1;
                                         })
                                 )
-                        )
-                )
-                .then(Commands.literal("leave")
+                        ).build(),
+                "Asigna un rol/cargo a un miembro del grupo",
+                List.of("gr")
+        );
+
+        cmds.register(Commands.literal("gleave")
                         .executes(ctx -> {
                             FunctionGroup.LeaveGroup(ctx);
                             return 1;
-                        })
-                )
-                .then(Commands.literal("invite")
+                        }).build(),
+                "Abandona el grupo actual",
+                List.of("lv")
+        );
+
+        cmds.register(Commands.literal("ginvite")
                         .then(Commands.argument("cargo", StringArgumentType.word())
                                 .suggests(Suggest.PlayersTypeSuggestions())
                                 .then(Commands.argument("jugador", StringArgumentType.greedyString())
@@ -79,9 +95,12 @@ public class CommandGroup {
                                             return 1;
                                         })
                                 )
-                        )
-                )
-                .then(Commands.literal("kick")
+                        ).build(),
+                "Invita a un jugador al grupo con un cargo específico",
+                List.of("iv")
+        );
+
+        cmds.register(Commands.literal("gkick")
                         .then(Commands.argument("jugador", StringArgumentType.greedyString())
                                 .suggests(Suggest.PlayersSuggestionsTeam())
                                 .executes(ctx -> {
@@ -89,14 +108,18 @@ public class CommandGroup {
                                     FunctionGroup.KickGroup(ctx, target);
                                     return 1;
                                 })
-                        )
-                )
-                .then(Commands.literal("disband")
+                        ).build(),
+                "Expulsa a un jugador del grupo",
+                List.of("gk")
+        );
+
+        cmds.register(Commands.literal("gdisband")
                         .executes(ctx -> {
                             FunctionGroup.DisbandGroup(ctx);
                             return 1;
-                        })
-                )
-                .build();
+                        }).build(),
+                "Disuelve el grupo actual",
+                List.of("gd")
+        );
     }
 }

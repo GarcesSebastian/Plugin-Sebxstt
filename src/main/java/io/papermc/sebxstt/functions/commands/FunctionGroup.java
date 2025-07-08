@@ -3,6 +3,7 @@ package io.papermc.sebxstt.functions.commands;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.sebxstt.helpers.GroupPermissions;
+import io.papermc.sebxstt.instances.WarpPoint;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.functions.utils.Lib;
@@ -13,14 +14,14 @@ import io.papermc.sebxstt.providers.PlayerProvider;
 import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
+import io.papermc.sebxstt.serialize.data.WarpPointData;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.papermc.sebxstt.index.mainData;
 import static io.papermc.sebxstt.index.mm;
@@ -176,16 +177,12 @@ public class FunctionGroup {
         }
         UUID playerRemovedUUID = grp.getMembers().stream().filter(plr -> InPlayer.name(plr).equals(p.getName())).findFirst().orElse(null);
         if(!(InPlayer.instance(playerRemovedUUID) instanceof Player playerRemoved)) return;
-        boolean removed = grp.kickMember(playerRemoved);
-        if (removed) {
-            p.sendMessage(mm.deserialize("<green>Has salido de <gold><bold>" + grp.getName() + "</bold></gold></green>"));
-            var owner = grp.getOwner();
-            InPlayer.message(owner,
-                    "<yellow><italic>" + p.getName() + "</italic> ha salido de tu grupo</yellow>"
-            );
-        } else {
-            p.sendMessage(mm.deserialize("<red><bold>Error al salir del grupo</bold></red>"));
-        }
+        grp.kickMember(playerRemoved);
+        p.sendMessage(mm.deserialize("<green>Has salido de <gold><bold>" + grp.getName() + "</bold></gold></green>"));
+        var owner = grp.getOwner();
+        InPlayer.message(owner,
+                "<yellow><italic>" + p.getName() + "</italic> ha salido de tu grupo</yellow>"
+        );
     }
 
     public static void InviteGroup(CommandContext<CommandSourceStack> ctx, String target, String cargo) {
@@ -299,7 +296,7 @@ public class FunctionGroup {
             p.sendMessage(mm.deserialize("<red>Solo el dueño del grupo puede disolverlo.</red>"));
             return;
         }
-        grp.disolve();
+        grp.dissolve();
         p.sendMessage(mm.deserialize("<green>Grupo <white><bold>" + grp.getName() + "</bold></white> disuelto correctamente.</green>"));
     }
 
@@ -352,6 +349,215 @@ public class FunctionGroup {
             p.sendMessage(mm.deserialize("<green>Chat de grupo <bold>activado</bold>.</green>"));
         } else {
             p.sendMessage(mm.deserialize("<yellow>Chat de grupo <bold>desactivado</bold>.</yellow>"));
+        }
+    }
+
+    public static void SetWarp(CommandContext<CommandSourceStack> ctx, String name) {
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        PlayersGroup pg = Lib.FindPlayerInGroup(p.getName());
+        if (pg == null) {
+            p.sendMessage(mm.deserialize("<red>No perteneces a ningún grupo. Usa <yellow>/group create <color> <nombre></yellow></red>"));
+            return;
+        }
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null || !GroupPermissions.canManageWarps(pc.getPlayerType())) {
+            p.sendMessage(mm.deserialize("<red>No tienes permiso para eliminar warps.</red>"));
+            return;
+        }
+
+        if (pg.getWarpPoints().stream().anyMatch(wp -> wp.name.equalsIgnoreCase(name))) {
+            p.sendMessage(mm.deserialize("<yellow>El warp <white>" + name + "</white> ya existe en tu grupo.</yellow>"));
+            return;
+        }
+
+        WarpPoint wp = new WarpPoint(name, p.getUniqueId(), pg.id, p.getLocation());
+        pg.getWarpPoints().add(wp);
+
+        p.sendMessage(mm.deserialize("<green>Warp <white>" + name + "</white> creado exitosamente.</green>"));
+        DS.edit("id", pg.id.toString(), PlayerGroupData.create(pg), PlayerGroupData.class);
+
+        pg.getPlayers().forEach(member -> {
+            if (!member.equals(p)) {
+                member.sendMessage(mm.deserialize("<gray>[Grupo]</gray> <white>" + p.getName() + "</white> creó un nuevo warp: <aqua>" + name + "</aqua>"));
+            }
+        });
+    }
+
+    public static void DeleteWarp(CommandContext<CommandSourceStack> ctx, String warpName) {
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        PlayersGroup pg = Lib.FindPlayerInGroup(p.getName());
+        if (pg == null) {
+            p.sendMessage(mm.deserialize("<red>No perteneces a ningún grupo.</red>"));
+            return;
+        }
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null || !GroupPermissions.canManageWarps(pc.getPlayerType())) {
+            p.sendMessage(mm.deserialize("<red>No tienes permiso para eliminar warps.</red>"));
+            return;
+        }
+
+        WarpPoint wp = pg.getWarpPoints().stream()
+                .filter(w -> w.name.equalsIgnoreCase(warpName))
+                .findFirst()
+                .orElse(null);
+
+        if (wp == null) {
+            p.sendMessage(mm.deserialize("<yellow>No existe un warp con el nombre <white>" + warpName + "</white>.</yellow>"));
+            return;
+        }
+
+        pg.getWarpPoints().remove(wp);
+
+        p.sendMessage(mm.deserialize("<green>Warp <white>" + warpName + "</white> eliminado correctamente.</green>"));
+        DS.edit("id", pg.id.toString(), PlayerGroupData.create(pg), PlayerGroupData.class);
+
+        pg.getPlayers().forEach(member -> {
+            if (!member.equals(p)) {
+                member.sendMessage(mm.deserialize("<gray>[Grupo] <white>" + p.getName() + "</white> eliminó el warp <red>" + warpName + "</red>"));
+            }
+        });
+    }
+
+    public static void WarpMember(CommandContext<CommandSourceStack> ctx, String warpName) {
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        PlayersGroup pg = Lib.FindPlayerInGroup(p.getName());
+        if (pg == null) {
+            p.sendMessage(mm.deserialize("<red>No perteneces a ningún grupo.</red>"));
+            return;
+        }
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null || !GroupPermissions.canUseWarps(pc.getPlayerType())) {
+            p.sendMessage(mm.deserialize("<red>No tienes permiso para usar warps.</red>"));
+            return;
+        }
+
+        WarpPoint wp = pg.getWarpPoints().stream().filter(wpp -> wpp.name.equalsIgnoreCase(warpName)).findFirst().orElse(null);
+        if (wp == null) {
+            p.sendMessage(mm.deserialize("<yellow>El warp <white>" + warpName + "</white> no existe.</yellow>"));
+            return;
+        }
+
+        wp.teleport(p.getUniqueId());
+
+        p.sendMessage(mm.deserialize("<green>Has sido teletransportado al warp <aqua>" + warpName + "</aqua>.</green>"));
+    }
+
+    public static void WarpAll(CommandContext<CommandSourceStack> ctx, String warpName) {
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        PlayersGroup pg = Lib.FindPlayerInGroup(p.getName());
+        if (pg == null) {
+            p.sendMessage(mm.deserialize("<red>No perteneces a ningún grupo.</red>"));
+            return;
+        }
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null || !GroupPermissions.canManageWarps(pc.getPlayerType())) {
+            p.sendMessage(mm.deserialize("<red>No tienes permiso para usar warps entre los miembros.</red>"));
+            return;
+        }
+
+        WarpPoint wp = pg.getWarpPoints().stream().filter(wpp -> wpp.name.equalsIgnoreCase(warpName)).findFirst().orElse(null);
+        if (wp == null) {
+            p.sendMessage(mm.deserialize("<yellow>El warp <white>" + warpName + "</white> no existe.</yellow>"));
+            return;
+        }
+
+        for (UUID member : pg.getMembers()) {
+            Player memberPlayer = InPlayer.instance(member);
+            if (memberPlayer != null) {
+                wp.teleport(member);
+                memberPlayer.sendMessage(mm.deserialize("<gray>Has sido teletransportado al warp <aqua>" + warpName + "</aqua> por <white>" + p.getName() + "</white>.</gray>"));
+            }
+        }
+
+        p.sendMessage(mm.deserialize("<green>Has teletransportado a todos los miembros al warp <aqua>" + warpName + "</aqua>.</green>"));
+    }
+
+    public static void WarpPost(CommandContext<CommandSourceStack> ctx, String post, String warpName) {
+        PlayerTypeGroup type;
+        try {
+            type = PlayerTypeGroup.valueOf(post.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            ctx.getSource().getSender().sendMessage(mm.deserialize("<red>Cargo inválido: <white>" + post + "</white></red>"));
+            return;
+        }
+
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        PlayersGroup pg = Lib.FindPlayerInGroup(p.getName());
+        if (pg == null) {
+            p.sendMessage(mm.deserialize("<red>No perteneces a ningún grupo.</red>"));
+            return;
+        }
+
+        PlayerConfig pc = Lib.getPlayerConfig(p);
+        if (pc == null || !GroupPermissions.canManageWarps(pc.getPlayerType())) {
+            p.sendMessage(mm.deserialize("<red>No tienes permiso para usar warps entre los miembros.</red>"));
+            return;
+        }
+
+        WarpPoint wp = pg.getWarpPoints().stream().filter(wpp -> wpp.name.equalsIgnoreCase(warpName)).findFirst().orElse(null);
+        if (wp == null) {
+            p.sendMessage(mm.deserialize("<yellow>El warp <white>" + warpName + "</white> no existe.</yellow>"));
+            return;
+        }
+
+        ArrayList<Player> members = pg.getMembers().stream()
+                .map(mm -> Lib.getPlayerConfig(InPlayer.instance(mm)))
+                .filter(pcc -> pcc.getPlayerType().equals(type))
+                .map(pcc -> InPlayer.instance(pcc.player))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if (members.isEmpty()) {
+            p.sendMessage(mm.deserialize("<yellow>No hay miembros con el cargo <white>" + post.toUpperCase() + "</white> en el grupo.</yellow>"));
+            return;
+        }
+
+        for (Player member : members) {
+            wp.teleport(member.getUniqueId());
+            member.sendMessage(mm.deserialize("<gray>Has sido teletransportado al warp <aqua>" + warpName + "</aqua> por <white>" + p.getName() + "</white>.</gray>"));
+        }
+
+        p.sendMessage(mm.deserialize("<green>Has teletransportado a los <white>" + post.toUpperCase() + "</white> al warp <aqua>" + warpName + "</aqua>.</green>"));
+    }
+
+    public static void ListWarps(CommandContext<CommandSourceStack> ctx) {
+        var senderRaw = ctx.getSource().getSender();
+        if (!(senderRaw instanceof Player p)) return;
+
+        PlayersGroup pg = Lib.FindPlayerInGroup(p.getName());
+        if (pg == null) {
+            p.sendMessage(mm.deserialize("<red>No perteneces a ningún grupo.</red>"));
+            return;
+        }
+
+        List<WarpPoint> warps = pg.getWarpPoints();
+        if (warps.isEmpty()) {
+            p.sendMessage(mm.deserialize("<gray>Tu grupo no tiene warps creados.</gray>"));
+            return;
+        }
+
+        p.sendMessage(mm.deserialize("<aqua><bold>Lista de Warps del Grupo:</bold></aqua>"));
+        for (WarpPoint wp : warps) {
+            String line = "<white>• <aqua>" + wp.name + "</aqua> <gray>(" +
+                    wp.location.getWorld().getName() + " - " +
+                    wp.location.getBlockX() + ", " +
+                    wp.location.getBlockY() + ", " +
+                    wp.location.getBlockZ() + ")</gray>";
+            p.sendMessage(mm.deserialize(line));
         }
     }
 }
