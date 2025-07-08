@@ -8,7 +8,7 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 ---
 
-## ✅ 1. Chat Privado de Grupo (Implementado)
+## ✅ 1. Chat Privado de Grupo (Implementado) 07/07/2025
 
 **Objetivo:** Permitir que los miembros de un grupo se comuniquen exclusivamente entre ellos a través de un canal privado persistente.
 
@@ -40,7 +40,7 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 ---
 
-## ✅ 2. Warps de Grupo (Implementado)
+## ✅ 2. Warps de Grupo (Implementado) 08/07/2025
 
 **Objetivo:** Permitir que los grupos establezcan y usen puntos de teletransporte compartidos.
 
