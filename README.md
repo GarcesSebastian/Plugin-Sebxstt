@@ -1,6 +1,6 @@
 # Sebxstt
 
-¡Bienvenido a la documentación de **Sebxstt**! Este es un plugin para PaperMC que implementa sistemas de checkpoints y grupos, permitiendo a los jugadores crear puntos de teletransporte y gestionar equipos con diferentes roles.
+¡Bienvenido a la documentación de **Sebxstt**! Este es un plugin para PaperMC que implementa sistemas avanzados de checkpoints y grupos, permitiendo a los jugadores crear puntos de teletransporte personales y gestionar equipos con diferentes roles y funcionalidades colaborativas.
 
 ---
 
@@ -11,9 +11,12 @@
 3. [Configuración](#configuración)
 4. [Sistema de Grupos](#sistema-de-grupos)
    - [Roles y Funcionalidades](#roles-y-funcionalidades)
+   - [Chat de Grupo](#chat-de-grupo)
+   - [Warps de Grupo](#warps-de-grupo)
 5. [Comandos](#comandos)
    - [Comandos de Checkpoint](#comandos-de-checkpoint)
    - [Comandos de Grupo](#comandos-de-grupo)
+   - [Comandos de Warps](#comandos-de-warps)
    - [Comandos de Jugador](#comandos-de-jugador)
 6. [Almacenamiento de Datos](#almacenamiento-de-datos)
 
@@ -23,6 +26,8 @@
 
 - **Sistema de Checkpoints**: Crea puntos personales de teletransporte con nombres personalizados.
 - **Sistema de Grupos**: Permite crear y gestionar equipos con diferentes roles y colores distintivos.
+- **Chat Privado de Grupo**: Comunícate exclusivamente con los miembros de tu grupo mediante un canal privado.
+- **Warps de Grupo**: Establece y comparte puntos de teletransporte para todo el equipo.
 - **Invitaciones a Grupos**: Sistema de invitaciones con aceptación/rechazo por parte de los jugadores.
 - **Regreso al Punto de Muerte**: Comando para volver al lugar donde moriste por última vez (con cooldown configurable).
 - **Almacenamiento Optimizado**: Toda la información se guarda en un único archivo JSON.
@@ -58,54 +63,88 @@ El plugin implementa un sistema de grupos que permite a los jugadores formar equ
 
 Existen 4 roles en el sistema de grupos:
 
-- **MANAGER**: Rol con control total sobre el grupo (manejo de equipo y miembros)
-- **CONTROLLER**: Rol con permisos limitados para colaborar con los manejadores del grupo
-- **VIEWER**: Miembro que puede involucrarse en acciones del equipo como inspección
-- **DENIED**: Miembro común sin permisos especiales en el grupo
+- **LEADER**: Propietario del grupo con control total sobre todas las funcionalidades.
+- **OFFICER**: Rol con permisos amplios para gestionar el grupo y sus miembros.
+- **MEMBER**: Miembro regular que puede utilizar las funcionalidades básicas del grupo.
+- **GUEST**: Miembro con permisos limitados, principalmente de visualización.
 
-### Características de los Grupos
+### Permisos por Rol
 
-- Cada grupo tiene un color distintivo que se muestra en el chat
-- Sistema de inventario compartido para los miembros del grupo
-- Protección de PvP entre miembros del mismo grupo
-- Distribución de experiencia entre miembros cercanos
+| Permiso | LEADER | OFFICER | MEMBER | GUEST |
+|---------|:------:|:-------:|:-------:|:----------:|
+| Gestionar miembros (invitar/expulsar) | ✅ | ✅ | ❌ | ❌ |
+| Cambiar roles de miembros | ✅ | ✅ | ❌ | ❌ |
+| Disolver grupo | ✅ | ❌ | ❌ | ❌ |
+| Gestionar warps (crear/eliminar) | ✅ | ✅ | ❌ | ❌ |
+| Usar warps | ✅ | ✅ | ✅ | ✅ |
+| Teleportar a todos miembros | ✅ | ✅ | ❌ | ❌ |
+| Acceder al almacenamiento | ✅ | ✅ | ✅ | ✅ |
+| Usar chat de grupo | ✅ | ✅ | ✅ | ✅ |
+
+### Chat de Grupo
+
+El plugin incorpora un sistema de chat privado de grupo que permite a los miembros comunicarse exclusivamente entre ellos:
+
+- Se activa/desactiva con el comando `/gchat on|off`
+- Los mensajes son visibles solo para los miembros del grupo
+- El formato del mensaje incluye el nombre y color del grupo
+- El estado del chat grupal persiste entre sesiones
+
+### Warps de Grupo
+
+Los grupos pueden establecer puntos de teletransporte compartidos:
+
+- Cada grupo puede crear múltiples warps en diferentes ubicaciones
+- Los warps son accesibles para todos los miembros del grupo
+- Miembros con permisos avanzados pueden teleportar a todos los miembros del grupo a un warp
+- También es posible teleportar solo a miembros con un cargo específico
 
 ---
 
 ## Comandos
 
-### Comando Checkpoint
+### Comandos de Checkpoint
 
-| Comando | Descripción | Permisos |
-|---------|-------------|----------|
-| `/checkpoint save [nombre]` | Guarda un checkpoint en tu ubicación actual | `sebxstt.command.checkpoint` |
-| `/checkpoint delete <nombre>` | Elimina un checkpoint guardado | `sebxstt.command.checkpoint` |
-| `/checkpoint teleport <nombre>` | Te teletransporta a un checkpoint guardado | `sebxstt.command.checkpoint` |
-| `/checkpoint tp <nombre>` | Alias para teleport | `sebxstt.command.checkpoint` |
+| Comando | Alias | Descripción | Permisos |
+|---------|-------|-------------|----------|
+| `/checkpoint save <nombre>` | `/cp save` | Guarda un checkpoint en tu ubicación actual | `sebxstt.command.checkpoint` |
+| `/checkpoint delete <nombre>` | `/cp delete` | Elimina un checkpoint guardado | `sebxstt.command.checkpoint` |
+| `/checkpoint tp <nombre>` | `/cp tp` | Te teletransporta a un checkpoint guardado | `sebxstt.command.checkpoint` |
+| `/checkpoint list` | `/cp list` | Muestra todos tus checkpoints guardados | `sebxstt.command.checkpoint` |
 
-### Comando Group
+### Comandos de Grupo
 
-| Comando                       | Descripción                         | Requisitos |
-|-------------------------------|-------------------------------------|------------|
-| `/group create <nombre> <color>` | Crea un nuevo grupo                 | `sebxstt.command.group` |
-| `/group chat`                 | Activar o desactivar el chat grupal | Miembro de grupo |
-| `/group storage`              | Abre el inventario compartido del grupo | Miembro de grupo |
-| `/group info [grupo]`         | Muestra información sobre tu grupo o uno especificado | `sebxstt.command.group` |
-| `/group post <jugador> <cargo>` | Cambia el cargo de un miembro       | MANAGER/CONTROLLER |
-| `/group leave`                | Abandona tu grupo actual            | Miembro de grupo |
-| `/group invite <jugador>`     | Invita a un jugador a tu grupo      | MANAGER/CONTROLLER |
-| `/group kick <jugador>`       | Expulsa a un jugador de tu grupo    | MANAGER/CONTROLLER |
-| `/group disband`              | Disuelve el grupo                   | Solo MANAGER |
+| Comando | Alias | Descripción | Requisitos |
+|---------|-------|-------------|------------|
+| `/gcreate <color> <nombre>` | `/gc` | Crea un nuevo grupo con color y nombre | `sebxstt.command.group` |
+| `/ginfo` | `/gi` | Muestra la información actual del grupo | Miembro de grupo |
+| `/gleave` | `/lv` | Abandona tu grupo actual | No ser LEADER |
+| `/ginvite <cargo> <jugador>` | `/iv` | Invita a un jugador con cargo específico | LEADER/OFFICER |
+| `/gkick <jugador>` | `/gk` | Expulsa a un jugador del grupo | LEADER/OFFICER |
+| `/gdisband` | `/gd` | Disuelve el grupo completamente | Solo LEADER |
+| `/grole <cargo> <jugador>` | `/gr` | Cambia el cargo de un miembro | LEADER/OFFICER |
+| `/gstorage` | `/st` | Abre el almacenamiento compartido del grupo | Miembro de grupo |
+| `/gchat <on\|off>` | `/ch` | Activa/desactiva el chat de grupo | Miembro de grupo |
 
-### Comando Player
+### Comandos de Warps
 
-| Comando | Descripción | Permisos |
-|---------|-------------|----------|
-| `/test` | Comando de prueba | `sebxstt.command.player` |
-| `/stats` o `/est` | Muestra estadísticas del jugador | `sebxstt.command.player` |
-| `/clearteams` | Limpia equipos del jugador | `sebxstt.command.player` |
-| `/return` | Te teletransporta a tu último punto de muerte | `sebxstt.command.player` |
-| `/invitations` o `/inv` | Muestra invitaciones pendientes a grupos | `sebxstt.command.player` |
+| Comando | Descripción | Requisitos |
+|---------|-------------|------------|
+| `/gwarp create <nombre>` | Crea un warp en tu ubicación actual | LEADER/OFFICER |
+| `/gwarp delete <nombre>` | Elimina un warp existente | LEADER/OFFICER |
+| `/gwarp list` | Muestra todos los warps del grupo | Miembro de grupo |
+| `/gwarp tp <nombre>` | Te teletransporta al warp especificado | Miembro de grupo |
+| `/gwarp all <nombre>` | Teletransporta a todos los miembros al warp | LEADER/OFFICER |
+| `/gwarp post <cargo> <nombre>` | Teletransporta a miembros con cargo específico | LEADER/OFFICER |
+
+### Comandos de Jugador
+
+| Comando | Alias | Descripción | Permisos |
+|---------|-------|-------------|----------|
+| `/stats` | `/est` | Muestra estadísticas del jugador | `sebxstt.command.player` |
+| `/clearteams` | - | Limpia equipos del jugador | `sebxstt.command.player` |
+| `/return` | - | Te teletransporta a tu último punto de muerte | `sebxstt.command.player` |
+| `/invitations` | `/inv` | Gestiona invitaciones pendientes a grupos | `sebxstt.command.player` |
 
 ---
 
@@ -117,16 +156,14 @@ Toda la información del plugin se almacena en un único archivo JSON definido e
 - Checkpoints guardados
 - Grupos creados y sus miembros
 - Roles de los miembros en cada grupo
+- Warps de grupo
+- Configuración del chat de grupo
 
 El plugin guarda los datos automáticamente en los siguientes momentos:
 
 - Al desconectarse un jugador
 - Al apagar el servidor
 - Periódicamente según el intervalo definido en la configuración (AutoSaveTime)
-
-El plugin guarda todos los datos en formato JSON en la carpeta `plugins/Sebxstt/`.
-
-- **`data.json`**: Almacena todos los datos del plugin (jugadores, grupos, checkpoints, y relaciones).
 
 ---
 

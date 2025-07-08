@@ -4,15 +4,26 @@
 
 Este documento describe una serie de **nuevas funcionalidades** propuestas para el plugin **Sebxstt**, un sistema avanzado de gestión de grupos en servidores PaperMC. Estas features buscan enriquecer la experiencia de los jugadores y ofrecer herramientas colaborativas dentro del entorno de Minecraft.
 
+## 📋 Resumen de Features
+
+| #  | Funcionalidad                 | Estado       | Fecha         |
+|----|-------------------------------|--------------|---------------|
+| 1  | Chat Privado de Grupo         | ✅ Implementado | 07/07/2025    |
+| 2  | Warps de Grupo                | ✅ Implementado | 08/07/2025    |
+| 3  | Roles y Permisos              | 🔄 En desarrollo | -             |
+| 4  | Sistema de Votación Interna   | 📝 Planeado    | -             |
+| 5  | Eventos de Grupo              | 📝 Planeado    | -             |
+| 6  | Menú Interactivo de Grupo     | 📝 Planeado    | -             |
+
 Cada funcionalidad se presenta con su objetivo, flujo de implementación propuesto o ya aplicado, junto con un análisis de sus ventajas y posibles inconvenientes.
 
 ---
 
-## ✅ 1. Chat Privado de Grupo (Implementado) Fecha: 07/07/2025
+## 1. Chat Privado de Grupo
 
 **Objetivo:** Permitir que los miembros de un grupo se comuniquen exclusivamente entre ellos a través de un canal privado persistente.
 
-**Estado:** ✅ Ya implementado.
+**Estado:** ✅ Implementado (07/07/2025)
 
 **Flujo de implementación final:**
 
@@ -40,11 +51,11 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 ---
 
-## ✅ 2. Warps de Grupo (Implementado) Fecha: 08/07/2025
+## 2. Warps de Grupo
 
 **Objetivo:** Permitir que los grupos establezcan y usen puntos de teletransporte compartidos.
 
-**Estado:** ✅ Ya implementado.
+**Estado:** ✅ Implementado (08/07/2025)  
 
 **Flujo de implementación final:**
 
@@ -73,9 +84,11 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 **Objetivo:** Establecer una jerarquía de control y responsabilidades dentro del grupo.
 
+**Estado:** 🔄 En desarrollo
+
 **Flujo de implementación:**
 
-1. Definir roles preestablecidos como: `LÍDER`, `MANAGER`, `MIEMBRO`, `OBSERVADOR`.
+1. Definir roles preestablecidos como: `LÍDER`, `OFFI`, `MIEMBRO`, `OBSERVADOR`.
 2. Asociar acciones permitidas a cada rol (editar baúl, invitar/kickear miembros, gestionar warps, etc.).
 3. Comando `/g setrole <jugador> <rol>` para asignar o cambiar roles.
 4. Validar permisos antes de ejecutar acciones restringidas.
@@ -97,6 +110,8 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 ## 4. Sistema de Votación Interna
 
 **Objetivo:** Permitir que los grupos tomen decisiones colectivas mediante votaciones internas.
+
+**Estado:** 📝 Planeado
 
 **Flujo de implementación:**
 
@@ -123,6 +138,8 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 **Objetivo:** Crear desafíos o actividades internas diseñadas para fomentar la cooperación entre los miembros del grupo.
 
+**Estado:** 📝 Planeado
+
 **Flujo de implementación:**
 
 1. Se diseñan tipos de eventos: PvE (bosses), PvP amistoso, desafíos de construcción, etc.
@@ -148,7 +165,9 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 **Objetivo:** Ofrecer a los jugadores una manera rápida, accesible y visual de gestionar su grupo sin necesidad de escribir comandos manualmente.
 
-**Flujo de implementación propuesto:**
+**Estado:** 📝 Planeado
+
+**Flujo de implementación:**
 
 1. Comando principal: `/gmenu` o `/group menu`.
 2. Al ejecutarlo, se abre un **menú tipo cofre** (Inventario GUI) con distintas secciones:
