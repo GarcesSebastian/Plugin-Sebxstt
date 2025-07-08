@@ -7,6 +7,11 @@ import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.RequestGroup;
+import io.papermc.sebxstt.instances.enums.InventoryType;
+import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
+import io.papermc.sebxstt.instances.ingame.inventory.enums.InventorySizeType;
+import io.papermc.sebxstt.instances.ingame.inventory.instances.ButtonItem;
+import io.papermc.sebxstt.instances.ingame.inventory.instances.ItemInventory;
 import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
@@ -16,6 +21,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
@@ -62,6 +68,28 @@ public class FunctionPlayer {
                 progress.awardCriteria(criteria);
             }
         }
+
+        NextInventory invGUI = new NextInventory("Prueba", InventorySizeType.NORMAL, p.getUniqueId(), InventoryType.PAGINATION);
+        invGUI.open();
+
+        ButtonItem diamond = invGUI.CustomButton("Diamond Unlimited", "", Material.DIAMOND, 5);
+        diamond.onClick(player -> {
+            System.out.println("[FunctionPlayer] El jugador " + player.getName() + " le ha dado click en " + diamond.name);
+        });
+
+        ItemInventory paper = invGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 0);
+
+        invGUI.onBack(player -> {
+            player.sendMessage(mm.deserialize(
+                    "<blue>Back Inventory</blue>"
+            ));
+        });
+
+        invGUI.onNext(player -> {
+            player.sendMessage(mm.deserialize(
+                    "<gold>Next Inventory</gold>"
+            ));
+        });
     }
 
     public static void ClearTeams(CommandContext<CommandSourceStack> ctx) {

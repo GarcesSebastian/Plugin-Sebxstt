@@ -2,6 +2,8 @@ package io.papermc.sebxstt;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
+import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
 import io.papermc.sebxstt.helpers.GroupPermissions;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
@@ -10,6 +12,7 @@ import io.papermc.sebxstt.instances.Main;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.functions.utils.Lib;
+import io.papermc.sebxstt.instances.ingame.inventory.NextInventoryProvider;
 import io.papermc.sebxstt.managers.CommandManager;
 import io.papermc.sebxstt.providers.ConfigurationProvider;
 import io.papermc.sebxstt.providers.DataStoreProvider;
@@ -20,6 +23,8 @@ import io.papermc.sebxstt.serialize.data.PlayerGroupData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.model.Dependency;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -50,6 +55,7 @@ public class index extends JavaPlugin implements Listener {
         DataStoreProvider.init(this);
         PluginProvider.init(this);
 
+        NextInventoryProvider.setup(this);
         Bukkit.getPluginManager().registerEvents(this, this);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {

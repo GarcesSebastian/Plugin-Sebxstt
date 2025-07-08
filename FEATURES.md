@@ -6,14 +6,14 @@ Este documento describe una serie de **nuevas funcionalidades** propuestas para 
 
 ## 📋 Resumen de Features
 
-| #  | Funcionalidad                 | Estado       | Fecha         |
-|----|-------------------------------|--------------|---------------|
-| 1  | Chat Privado de Grupo         | ✅ Implementado | 07/07/2025    |
-| 2  | Warps de Grupo                | ✅ Implementado | 08/07/2025    |
-| 3  | Roles y Permisos              | 🔄 En desarrollo | -             |
-| 4  | Sistema de Votación Interna   | 📝 Planeado    | -             |
-| 5  | Eventos de Grupo              | 📝 Planeado    | -             |
-| 6  | Menú Interactivo de Grupo     | 📝 Planeado    | -             |
+| #  | Funcionalidad                 | Estado           | Fecha         |
+|----|-------------------------------|------------------|---------------|
+| 1  | Chat Privado de Grupo         | ✅ Implementado   | 07/07/2025    |
+| 2  | Warps de Grupo                | ✅ Implementado   | 08/07/2025    |
+| 3  | Roles y Permisos              | 📝 Planeado      | -             |
+| 4  | Sistema de Votación Interna   | 📝 Planeado      | -             |
+| 5  | Eventos de Grupo              | 📝 Planeado      | -             |
+| 6  | Menú Interactivo de Grupo     | 🔄 En desarrollo | -             |
 
 Cada funcionalidad se presenta con su objetivo, flujo de implementación propuesto o ya aplicado, junto con un análisis de sus ventajas y posibles inconvenientes.
 
@@ -163,39 +163,100 @@ Cada funcionalidad se presenta con su objetivo, flujo de implementación propues
 
 ## 6. Menú Interactivo de Grupo (GUI In-Game)
 
-**Objetivo:** Ofrecer a los jugadores una manera rápida, accesible y visual de gestionar su grupo sin necesidad de escribir comandos manualmente.
+**Objetivo:** Ofrecer a los jugadores una manera rápida, accesible y visual de gestionar su grupo sin necesidad de escribir comandos manualmente, mediante un sistema de inventarios personalizados (GUIs) construido sobre la clase `InventoryGUI`.
 
-**Estado:** 📝 Planeado
-
-**Flujo de implementación:**
-
-1. Comando principal: `/gmenu` o `/group menu`.
-2. Al ejecutarlo, se abre un **menú tipo cofre** (Inventario GUI) con distintas secciones:
-   - 📜 **Información del Grupo**: muestra nombre, color, fundación y miembros.
-   - 🎭 **Gestión de Miembros**: invitar, kickear o cambiar cargos con clicks.
-   - 🚪 **Warps del Grupo**: listado de warps disponibles y acceso rápido a cada uno.
-   - ✉️ **Invitaciones Pendientes**: ver solicitudes enviadas/recibidas.
-   - ⚙️ **Configuraciones**: cambiar chat, color del grupo o disolverlo.
-3. Cada sección puede abrir submenús más detallados si es necesario.
-4. Toda la interacción se realiza con clicks, evitando comandos largos.
-5. Se implementa con `Inventory`, `ItemStack`, `ClickEvent`, y listeners propios.
-
-**Pros:**
-
-- Experiencia intuitiva para usuarios Bedrock/mobile.
-- Reduce la necesidad de recordar comandos complejos.
-- Estéticamente atractivo y profesional.
-- Permite ampliar funciones en el futuro de forma modular.
-
-**Contras:**
-
-- Requiere un sistema robusto de manejo de menús y eventos de click.
-- Aumenta la necesidad de sincronización entre menú e información persistente.
-- Necesario considerar restricciones de acceso por rol (ej. no todos pueden kickear/invitar).
+**Estado:** 🔄 En desarrollo
 
 ---
 
-> **Nota:** Estas funcionalidades están diseñadas para complementar el sistema actual de grupos en Sebxstt. Se recomienda implementarlas de manera modular, evaluando dependencias y prioridades según las necesidades de la comunidad y la estabilidad del servidor.
+### 🧩 Plan Estratégico de Desarrollo del Sistema GUI
+
+Para implementar correctamente el menú interactivo del grupo y asegurar su escalabilidad y mantenibilidad, se plantea la construcción de una librería modular con los siguientes objetivos y componentes:
+
+#### 🎯 Objetivo General
+Desarrollar un sistema extensible y reutilizable para crear y gestionar interfaces gráficas (inventarios) que permita construir menús tipo cofre con acciones dinámicas, soporte para paginación, navegación, condiciones, y más.
+
+---
+
+### 🧱 Componentes Fundamentales
+
+#### 1. Núcleo: `InventoryGUI`
+- Controla el estado de un inventario (UUID, tamaño, título, tipo).
+- Soporta diferentes tipos: `NORMAL`, `PAGINATION`, `SCROLLING`.
+- Permite abrir/cerrar el inventario y acceder a la instancia real.
+
+#### 2. Manejador de Eventos Global
+- Captura y dirige todos los clics, arrastres y cierres.
+- Asocia automáticamente las acciones al inventario correspondiente.
+- Previene interacciones indebidas mediante `event.setCancelled(true)`.
+
+#### 3. Sistema de Componentes Interactivos
+- Permite crear ítems con comportamiento:
+   - 📦 Botón con acción
+   - 📄 Elemento estático
+   - 🔁 Navegador de páginas
+   - 📜 Selector de opciones
+   - 🧠 Condicional según permisos o estado del jugador
+
+#### 4. Renderizado Dinámico
+- Métodos `render()` o `refresh()` para actualizar contenido.
+- Ideal para menús que reflejan el estado del grupo en tiempo real.
+- Opcionalmente permite animaciones simples o rotación de ítems.
+
+#### 5. Navegación Interna
+- Implementar historial o pila de navegación (`goBack()`).
+- Soporte para submenús con retorno.
+- Configurable por permisos o estados (ej. solo líderes acceden a ciertas secciones).
+
+#### 6. Sistema de Condiciones
+- Asocia componentes con condiciones dinámicas:
+   - `si jugador es líder`
+   - `si tiene x ítem`
+   - `si está en cooldown`
+- Evita mostrar botones que no aplican al jugador actual.
+
+#### 7. Soporte para Archivos Externos (Opcional)
+- Definir menús o plantillas desde `.yml` o `.json`.
+- Útil para modificar GUIs sin recompilar el plugin.
+
+#### 8. Herramientas de Debug y Log
+- Activar logs para aperturas, clics, errores.
+- Modo debug para desarrolladores (`/gmenu debug`).
+
+---
+
+### 🧭 Flujo de Interacción Propuesto
+
+1. El jugador ejecuta `/gmenu` o `/group menu`.
+2. Se abre un inventario tipo cofre con las siguientes secciones:
+   - 📜 Información del grupo
+   - 🎭 Gestión de miembros
+   - 🚪 Warps del grupo
+   - ✉️ Invitaciones pendientes
+   - ⚙️ Configuraciones
+3. Cada sección abre submenús específicos.
+4. Los botones ejecutan acciones o cambian la vista.
+5. El menú se cierra automáticamente tras ciertas acciones o se puede navegar hacia atrás.
+
+---
+
+### ✅ Ventajas
+
+- ✅ Experiencia intuitiva y visual
+- ✅ Accesibilidad para usuarios sin comandos
+- ✅ Modular y fácilmente ampliable
+- ✅ Reducción de errores humanos por comandos mal escritos
+
+### ⚠️ Desafíos
+
+- ⚠️ Manejo robusto de eventos y navegación
+- ⚠️ Sincronización en tiempo real con datos persistentes
+- ⚠️ Control de permisos por rol dentro del grupo
+- ⚠️ Necesidad de pruebas cuidadosas para prevenir exploits
+
+---
+
+> **Nota:** Este sistema GUI servirá como base para todos los menús interactivos del plugin Sebxstt. Su diseño modular permitirá integrar futuras funcionalidades sin reescribir lógica existente, manteniendo el código limpio y desacoplado.
 
 ---
 

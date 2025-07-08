@@ -29,11 +29,6 @@
             <id>dmulloy2-repo</id>
             <url>https://repo.dmulloy2.net/repository/public/</url>
         </repository>
-
-        <repository>
-            <id>xenondevs</id>
-            <url>https://repo.xenondevs.xyz/releases</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -56,13 +51,6 @@
             <artifactId>ProtocolLib</artifactId>
             <version>5.3.0</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>xyz.xenondevs.invui</groupId>
-            <artifactId>invui</artifactId>
-            <version>1.46</version>
-            <type>pom</type>
         </dependency>
     </dependencies>
 
