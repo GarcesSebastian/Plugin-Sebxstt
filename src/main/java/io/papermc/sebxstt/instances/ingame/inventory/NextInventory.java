@@ -14,13 +14,12 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.resolve;
-import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.verifyPlayer;
+import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.*;
 
 public class NextInventory extends NextInventoryListener {
     public UUID id;
-    public String title;
-    public InventorySizeType size;
+    private String title;
+    private InventorySizeType size;
 
     private InventoryType type;
     private UUID player;
@@ -30,10 +29,13 @@ public class NextInventory extends NextInventoryListener {
     private ButtonItem current;
     private ButtonItem next;
 
-    public ArrayList<ButtonItem> actionList = new ArrayList<>();
+    private ArrayList<ButtonItem> actionList = new ArrayList<>();
 
-    public ArrayList<Integer> indexBlockedList = new ArrayList<>();
-    public ArrayList<Integer> indexAllowedList = new ArrayList<>();
+    private ArrayList<Integer> indexBlockedList = new ArrayList<>();
+    private ArrayList<Integer> indexAllowedList = new ArrayList<>();
+
+    private ArrayList<ButtonItem> itemsButton = new ArrayList<>();
+    private ArrayList<ItemInventory> items = new ArrayList<>();
 
     public NextInventory(String title, InventorySizeType size, UUID player, InventoryType type) {
         super(type);
@@ -45,10 +47,10 @@ public class NextInventory extends NextInventoryListener {
         this.instance = Bukkit.createInventory(null, size.getTotalSlots(), title);
         this.type = type;
 
-        resolve(this);
-
         NextInventoryProvider.nextInventoryMap.put(this.instance, this);
         NextInventoryProvider.nextInventoryList.add(this);
+
+        resolve(this);
     }
 
     public void open() throws IllegalStateException {
@@ -62,23 +64,37 @@ public class NextInventory extends NextInventoryListener {
     }
 
     public ItemInventory CustomItem(String name, String description, Material material, int index) {
-        if (!this.indexAllowedList.contains(index)) {
-            throw new IllegalStateException("Este indice no esta disponible: "  + index);
-        }
-
+        Integer indexResolved = originalIndex(this, index);
         ItemInventory itemInventory = new ItemInventory(name, description, material, this);
-        itemInventory.setIndex(index);
+        itemInventory.setIndex(indexResolved);
         return itemInventory;
     }
 
     public ButtonItem CustomButton(String name, String description, Material material, int index) {
-        if (!this.indexAllowedList.contains(index)) {
-            throw new IllegalStateException("Este indice no esta disponible: "  + index);
-        }
-        
+        Integer indexResolved = originalIndex(this, index);
         ButtonItem bt = new ButtonItem(name, description, material, this);
-        bt.setIndex(index);
+        bt.setIndex(indexResolved);
         return bt;
+    }
+
+    public void setItem(ItemInventory itemInventory) {
+        this.instance.setItem(itemInventory.getIndex(), itemInventory.getInstance());
+    }
+
+    public void setItem(ButtonItem buttonItem) {
+        this.instance.setItem(buttonItem.getIndex(), buttonItem.getInstance());
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setSize(InventorySizeType size) {
+        this.size = size;
+    }
+
+    public void setType(InventoryType type) {
+        this.type = type;
     }
 
     public void setBack(ButtonItem back) {
@@ -99,6 +115,38 @@ public class NextInventory extends NextInventoryListener {
 
     public void setIndexAllowedList(ArrayList<Integer> indexAllowedList) {
         this.indexAllowedList = indexAllowedList;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public InventorySizeType getSize() {
+        return size;
+    }
+
+    public ArrayList<Integer> getAllowedList() {
+        return indexAllowedList;
+    }
+
+    public ArrayList<Integer> getBlockedList() {
+        return indexBlockedList;
+    }
+
+    public ArrayList<ButtonItem> getActionList() {
+        return actionList;
+    }
+
+    public ArrayList<ItemInventory> getItems() {
+        return items;
+    }
+
+    public ArrayList<ButtonItem> getItemsButton() {
+        return itemsButton;
     }
 
     public InventoryType getType() {

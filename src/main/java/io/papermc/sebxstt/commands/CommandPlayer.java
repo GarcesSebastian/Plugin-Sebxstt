@@ -19,6 +19,18 @@ public class CommandPlayer {
         );
 
         cmds.register(
+                Commands.literal("invtest")
+                        .then(Commands.argument("player", StringArgumentType.greedyString())
+                                .suggests(Suggest.PlayersSuggestions())
+                                .executes(ctx -> {
+                                    String name = ctx.getArgument("player", String.class);
+                                    FunctionPlayer.inv(ctx, name);
+                                    return 1;
+                                })
+                        ).build()
+        );
+
+        cmds.register(
                 ReturnCommand.create("stats", ctx -> {
                     FunctionPlayer.PreviewPlayer(ctx);
                     return 1;

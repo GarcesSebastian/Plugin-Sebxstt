@@ -23,8 +23,13 @@ public class InventoryHelper {
         return plr;
     }
 
-    public static int originalIndex(NextInventory nextInventory, int index) {
-        return 0;
+    public static Integer originalIndex(NextInventory nextInventory, int index) {
+        Integer indexResolved = nextInventory.getAllowedList().get(index);
+        if (indexResolved == null) {
+            throw new IllegalStateException("No se encontro el indice " + index);
+        }
+
+        return indexResolved;
     }
 
     public static ItemStack blocked() {
@@ -43,20 +48,19 @@ public class InventoryHelper {
 
         InventoryType type = nextInventory.getType();
 
-
         if (type == InventoryType.PAGINATION) {
             nextInventory.setBack(new ButtonItem("Back Page", "Pagina anterior", Material.ARROW, nextInventory));
             nextInventory.setCurrent(new ButtonItem("Current Page", "Pagina actual", Material.CLOCK, nextInventory));
             nextInventory.setNext(new ButtonItem("Next Page", "Pagina siguiente", Material.ARROW, nextInventory));
 
-            nextInventory.getBack().setIndex(nextInventory.size.getTotalSlots() - 6);
-            nextInventory.getCurrent().setIndex(nextInventory.size.getTotalSlots() - 5);
-            nextInventory.getNext().setIndex(nextInventory.size.getTotalSlots() - 4);
+            nextInventory.getBack().setIndex(nextInventory.getSize().getTotalSlots() - 6);
+            nextInventory.getCurrent().setIndex(nextInventory.getSize().getTotalSlots() - 5);
+            nextInventory.getNext().setIndex(nextInventory.getSize().getTotalSlots() - 4);
 
-            nextInventory.setIndexBlockedList(new ArrayList<>(nextInventory.size.getBlockedSlots()));
-            nextInventory.setIndexAllowedList(new ArrayList<>(nextInventory.size.getAllowedSlots()));
+            nextInventory.setIndexBlockedList(new ArrayList<>(nextInventory.getSize().getBlockedSlots()));
+            nextInventory.setIndexAllowedList(new ArrayList<>(nextInventory.getSize().getAllowedSlots()));
 
-            for (Integer index : nextInventory.indexBlockedList) {
+            for (Integer index : nextInventory.getBlockedList()) {
                 nextInventory.getInstance().setItem(index, blocked());
             }
 
@@ -64,9 +68,9 @@ public class InventoryHelper {
             nextInventory.getInstance().setItem(nextInventory.getCurrent().getIndex(), nextInventory.getCurrent().getInstance());
             nextInventory.getInstance().setItem(nextInventory.getNext().getIndex(), nextInventory.getNext().getInstance());
 
-            nextInventory.actionList.add(nextInventory.getBack());
-            nextInventory.actionList.add(nextInventory.getCurrent());
-            nextInventory.actionList.add(nextInventory.getNext());
+            nextInventory.getActionList().add(nextInventory.getBack());
+            nextInventory.getActionList().add(nextInventory.getCurrent());
+            nextInventory.getActionList().add(nextInventory.getNext());
 
             nextInventory.getBack().onClick(nextInventory::emitBack);
             nextInventory.getNext().onClick(nextInventory::emitNext);

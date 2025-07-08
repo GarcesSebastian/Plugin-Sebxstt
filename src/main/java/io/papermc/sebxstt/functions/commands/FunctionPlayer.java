@@ -9,6 +9,7 @@ import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.RequestGroup;
 import io.papermc.sebxstt.instances.enums.InventoryType;
 import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
+import io.papermc.sebxstt.instances.ingame.inventory.NextInventoryProvider;
 import io.papermc.sebxstt.instances.ingame.inventory.enums.InventorySizeType;
 import io.papermc.sebxstt.instances.ingame.inventory.instances.ButtonItem;
 import io.papermc.sebxstt.instances.ingame.inventory.instances.ItemInventory;
@@ -74,10 +75,12 @@ public class FunctionPlayer {
 
         ButtonItem diamond = invGUI.CustomButton("Diamond Unlimited", "", Material.DIAMOND, 5);
         diamond.onClick(player -> {
-            System.out.println("[FunctionPlayer] El jugador " + player.getName() + " le ha dado click en " + diamond.name);
+            System.out.println("[FunctionPlayer] El jugador " + player.getName() + " le ha dado click en " + diamond.getName());
         });
 
-        ItemInventory paper = invGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 0);
+        ItemInventory paper = invGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 5)
+                        .draggable(false);
+        invGUI.setItem(paper);
 
         invGUI.onBack(player -> {
             player.sendMessage(mm.deserialize(
@@ -89,6 +92,20 @@ public class FunctionPlayer {
             player.sendMessage(mm.deserialize(
                     "<gold>Next Inventory</gold>"
             ));
+        });
+    }
+
+    public static void inv(CommandContext<CommandSourceStack> ctx, String target) {
+        Player plr = Bukkit.getPlayerExact(target);
+        NextInventory nextInventory = NextInventoryProvider.nextInventoryList.stream()
+                .filter(iv -> iv.getPlayer().equals(plr.getUniqueId()))
+                .findFirst().orElse(null);
+
+        String newName = "PRUEBAA";
+        nextInventory.getItems().forEach(item -> {
+            System.out.println("[FunctionPlayer] se cambio el nombre del item " + item.getName() + " a " + newName);
+            item.setName(newName);
+            item.draggable(true);
         });
     }
 

@@ -1,7 +1,6 @@
 package io.papermc.sebxstt.instances.ingame.inventory.custom_listener;
 
 import io.papermc.sebxstt.instances.enums.InventoryType;
-import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
 import org.bukkit.entity.Player;
 
 import java.util.function.Consumer;
@@ -15,6 +14,7 @@ public class NextInventoryListener {
 
     private Consumer<Player> onBackCallback;
     private Consumer<Player> onNextCallback;
+    private Runnable onRefreshCallback;
 
     public void onBack(Consumer<Player> onBackCallback) {
         if (type == InventoryType.PAGINATION) {
@@ -32,6 +32,10 @@ public class NextInventoryListener {
         }
     }
 
+    public void onRefresh(Runnable onRefreshCallback) {
+        this.onRefreshCallback = onRefreshCallback;
+    }
+
     public void emitBack(Player player) {
         if (onBackCallback != null) {
             onBackCallback.accept(player);
@@ -41,6 +45,12 @@ public class NextInventoryListener {
     public void emitNext(Player player) {
         if (onNextCallback != null) {
             onNextCallback.accept(player);
+        }
+    }
+
+    public void emitRefresh() {
+        if (onRefreshCallback != null) {
+            onRefreshCallback.run();
         }
     }
 }

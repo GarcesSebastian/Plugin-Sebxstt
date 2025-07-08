@@ -14,11 +14,11 @@ public class ButtonItem extends ItemInventory {
 
     public ButtonItem(String name, String description, Material materialType, NextInventory parent) {
         super(name, description, materialType, parent);
+        parent.getItemsButton().add(this);
     }
 
     public void onClick(Consumer<Player> onClickCallback) {
-        System.out.println("[NextInventory] ID " + parent);
-        NextInventory inventory = next(parent);
+        NextInventory inventory = next(this.getParent());
         InventoryType type = inventory.getType();
         if (type == InventoryType.PAGINATION) {
             this.onClickCallback = onClickCallback;
