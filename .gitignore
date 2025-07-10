@@ -12,6 +12,8 @@ target/
 
 ## Solucionar error con el parent de onClick
 
+## copy tag name of server bdwrs, etc (ping, level, kills, any)
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
