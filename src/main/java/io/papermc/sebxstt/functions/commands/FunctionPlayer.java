@@ -7,104 +7,45 @@ import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.RequestGroup;
-import io.papermc.sebxstt.instances.enums.InventoryType;
 import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
 import io.papermc.sebxstt.instances.ingame.inventory.NextInventoryProvider;
-import io.papermc.sebxstt.instances.ingame.inventory.enums.InventorySizeType;
-import io.papermc.sebxstt.instances.ingame.inventory.instances.ButtonItem;
-import io.papermc.sebxstt.instances.ingame.inventory.instances.ItemInventory;
 import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.advancement.Advancement;
-import org.bukkit.advancement.AdvancementProgress;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 
-import static io.papermc.sebxstt.index.mainData;
-import static io.papermc.sebxstt.index.mm;
+import static io.papermc.sebxstt.index.*;
 import static io.papermc.sebxstt.providers.DataStoreProvider.DS;
 
 public class FunctionPlayer {
-    public static void Test(CommandContext<CommandSourceStack> ctx) {
+    public static void test(CommandContext<CommandSourceStack> ctx, String target) {
         CommandSender senderRaw = ctx.getSource().getSender();
         if(!(senderRaw instanceof Player p)) return;
-
-        p.sendMessage(Component.text("Post Docker Post Reset"));
-
-        p.sendActionBar(Component.text("¡Estás en zona segura!", NamedTextColor.GREEN));
-
-        p.showTitle(Title.title(
-                Component.text("¡Bienvenido!", NamedTextColor.GOLD, TextDecoration.BOLD),
-                Component.text("Prepárate para la aventura", NamedTextColor.GRAY),
-                Title.Times.times(Duration.ofSeconds(1), Duration.ofSeconds(3), Duration.ofSeconds(1))
-        ));
-
-        BossBar bar = BossBar.bossBar(
-                Component.text("Evento comenzando en 30s"),
-                1.0f,
-                BossBar.Color.PURPLE,
-                BossBar.Overlay.PROGRESS
-        );
-        bar.addViewer(p);
-
-        Advancement advancement = Bukkit.getAdvancement(NamespacedKey.minecraft("story/mine_stone"));
-        if (advancement != null) {
-            AdvancementProgress progress = p.getAdvancementProgress(advancement);
-            for (String criteria : progress.getRemainingCriteria()) {
-                progress.awardCriteria(criteria);
-            }
-        }
-
-        NextInventory invGUI = new NextInventory("Prueba", InventorySizeType.NORMAL, p.getUniqueId(), InventoryType.PAGINATION);
-        invGUI.open();
-
-        ButtonItem diamond = invGUI.CustomButton("Diamond Unlimited", "", Material.DIAMOND, 5);
-        diamond.onClick(player -> {
-            System.out.println("[FunctionPlayer] El jugador " + player.getName() + " le ha dado click en " + diamond.getName());
-        });
-
-        ItemInventory paper = invGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 5)
-                        .draggable(false);
-        invGUI.setItem(paper);
-
-        invGUI.onBack(player -> {
-            player.sendMessage(mm.deserialize(
-                    "<blue>Back Inventory</blue>"
-            ));
-        });
-
-        invGUI.onNext(player -> {
-            player.sendMessage(mm.deserialize(
-                    "<gold>Next Inventory</gold>"
-            ));
-        });
+        OfflinePlayer offPlayer = Bukkit.getOfflinePlayer(target);
+        NextGUI.open(offPlayer.getUniqueId());
     }
 
-    public static void inv(CommandContext<CommandSourceStack> ctx, String target) {
+    public static void test2(CommandContext<CommandSourceStack> ctx, String target) {
         Player plr = Bukkit.getPlayerExact(target);
+        assert plr != null;
+
         NextInventory nextInventory = NextInventoryProvider.nextInventoryList.stream()
-                .filter(iv -> iv.getPlayer().equals(plr.getUniqueId()))
+                .filter(iv -> iv.getPlayers().contains(plr.getUniqueId()))
                 .findFirst().orElse(null);
 
-        String newName = "PRUEBAA";
+        if (nextInventory == null) throw new IllegalStateException("Not found nextInventory by id player " + plr.getUniqueId());
+
         nextInventory.getItems().forEach(item -> {
-            System.out.println("[FunctionPlayer] se cambio el nombre del item " + item.getName() + " a " + newName);
-            item.setName(newName);
+            item.setName(UUID.randomUUID().toString().substring(0, 8));
             item.draggable(true);
         });
     }

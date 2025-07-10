@@ -3,15 +3,15 @@ package io.papermc.sebxstt.instances.ingame.inventory;
 import io.papermc.sebxstt.instances.enums.InventoryType;
 import io.papermc.sebxstt.instances.ingame.inventory.custom_listener.NextInventoryListener;
 import io.papermc.sebxstt.instances.ingame.inventory.enums.InventorySizeType;
-import io.papermc.sebxstt.instances.ingame.inventory.instances.ButtonItem;
-import io.papermc.sebxstt.instances.ingame.inventory.instances.ItemInventory;
+import io.papermc.sebxstt.instances.ingame.inventory.instances.NextItem;
+import io.papermc.sebxstt.instances.ingame.inventory.instances.NextPage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.*;
@@ -22,67 +22,149 @@ public class NextInventory extends NextInventoryListener {
     private InventorySizeType size;
 
     private InventoryType type;
-    private UUID player;
+    private ArrayList<UUID> players = new ArrayList<>();
     private Inventory instance;
 
-    private ButtonItem back;
-    private ButtonItem current;
-    private ButtonItem next;
+    private NextItem back;
+    private NextItem current;
+    private NextItem next;
 
-    private ArrayList<ButtonItem> actionList = new ArrayList<>();
+    private Integer currentPage = 0;
+
+    private ArrayList<NextItem> actionList = new ArrayList<>();
 
     private ArrayList<Integer> indexBlockedList = new ArrayList<>();
     private ArrayList<Integer> indexAllowedList = new ArrayList<>();
 
-    private ArrayList<ButtonItem> itemsButton = new ArrayList<>();
-    private ArrayList<ItemInventory> items = new ArrayList<>();
+    private ArrayList<NextPage> pages = new ArrayList<>();
+    private ArrayList<NextItem> items = new ArrayList<>();
 
-    public NextInventory(String title, InventorySizeType size, UUID player, InventoryType type) {
-        super(type);
-        this.id = UUID.randomUUID();
+    public NextInventory(String title, InventorySizeType size, InventoryType type) {
+        super(UUID.randomUUID(), type);
+        this.id = super.nextInventory;
         this.title = title;
         this.size = size;
 
-        this.player = player;
         this.instance = Bukkit.createInventory(null, size.getTotalSlots(), title);
         this.type = type;
 
         NextInventoryProvider.nextInventoryMap.put(this.instance, this);
         NextInventoryProvider.nextInventoryList.add(this);
 
+        System.out.println("[NextInventory] Before Resolve");
+        this.pages.add(new NextPage(this).index(0));
         resolve(this);
     }
 
-    public void open() throws IllegalStateException {
-        Player plr = verifyPlayer(this.player);
+    public NextInventory open(UUID target) throws IllegalStateException {
+        if (!this.players.contains(target)) {
+            this.players.add(target);
+        }
+
+        Player plr = verifyPlayer(target);
         plr.openInventory(this.instance);
+
+        return this;
     }
 
-    public void close() throws IllegalStateException {
-        Player plr = verifyPlayer(this.player);
+    public NextInventory close(UUID target) throws IllegalStateException {
+        this.players.remove(target);
+        Player plr = verifyPlayer(target);
         plr.closeInventory();
+
+        return this;
     }
 
-    public ItemInventory CustomItem(String name, String description, Material material, int index) {
+    public void update(NextPage currentPage) {
+        this.instance.clear();
+        RenderPagination(this);
+
+        for (UUID item : currentPage.getStack()) {
+            try {
+                NextItem nextItem = item(item, this.id);
+                this.instance.setItem(nextItem.getIndex(), nextItem.getInstance());
+            } catch (IllegalStateException e) {
+                System.err.println("[Inventory Update] Fallo al cargar ítem: " + e.getMessage());
+            }
+        }
+
+        String backDescription = (currentPage.getIndex() <= 0)
+                ? "<red>No puedes retroceder</red>"
+                : "Pagina anterior: <yellow>" + (currentPage.getIndex() - 1) + "</yellow>";
+
+        String nextDescription = (currentPage.getIndex() >= this.pages.size() - 1)
+                ? "<red>No puedes avanzar</red>"
+                : "Pagina siguiente: <yellow>" + (currentPage.getIndex() + 1) + "</yellow>";
+
+        this.back.setDescription(backDescription);
+        this.current.setDescription("Pagina actual: <yellow>" + currentPage.getIndex() + "</yellow>");
+        this.next.setDescription(nextDescription);
+    }
+
+
+    public void back() {
+        System.out.println("[NextInventory] CurrentPage " + this.currentPage);
+        if (this.currentPage <= 0) return;
+        this.currentPage--;
+        NextPage currentPage = this.pages.stream().filter(p -> p.getIndex() == this.currentPage).findFirst().orElse(null);
+        if (currentPage == null) {
+            System.out.println("[NextInventory] Page Not Found " + this.currentPage);
+            this.currentPage++;
+            return;
+        }
+
+        System.out.println("[NextInventory] Resolve CurrentPage " + this.currentPage);
+        this.update(currentPage);
+    }
+
+    public void next() {
+        System.out.println("[NextInventory] CurrentPage " + this.currentPage);
+        if (this.currentPage >= this.pages.size() - 1) return;
+        this.currentPage++;
+        NextPage currentPage = this.pages.stream()
+                .filter(p -> p.getIndex() == this.currentPage)
+                .findFirst()
+                .orElse(null);
+
+        if (currentPage == null) {
+            System.out.println("[NextInventory] Page Not Found " + this.currentPage);
+            this.currentPage--;
+            return;
+        }
+
+        System.out.println("[NextInventory] Resolve CurrentPage " + this.currentPage);
+        this.update(currentPage);
+    }
+
+    public NextItem CustomItem(String name, String description, Material material, int index) {
         Integer indexResolved = originalIndex(this, index);
-        ItemInventory itemInventory = new ItemInventory(name, description, material, this);
-        itemInventory.setIndex(indexResolved);
-        return itemInventory;
+        NextItem nextItem = new NextItem(name, description, material, this);
+        nextItem.setIndex(indexResolved);
+        return nextItem;
     }
 
-    public ButtonItem CustomButton(String name, String description, Material material, int index) {
-        Integer indexResolved = originalIndex(this, index);
-        ButtonItem bt = new ButtonItem(name, description, material, this);
-        bt.setIndex(indexResolved);
-        return bt;
+    public NextInventory pages(int amount) {
+        for (int i = 0; i < amount; i++) {
+            NextPage newPage = new NextPage(this).index(this.pages.size());
+            this.pages.add(newPage);
+        }
+
+        return this;
     }
 
-    public void setItem(ItemInventory itemInventory) {
-        this.instance.setItem(itemInventory.getIndex(), itemInventory.getInstance());
+    public void setItem(NextItem nextItem) {
+        checkItem(this, nextItem);
+        nextItem.registry(true);
+        this.instance.setItem(nextItem.getIndex(), nextItem.getInstance());
     }
 
-    public void setItem(ButtonItem buttonItem) {
-        this.instance.setItem(buttonItem.getIndex(), buttonItem.getInstance());
+    public ArrayList<NextItem> Buttons() {
+        List<NextItem> buttonsOnly = items.stream()
+                .filter(NextItem::isButton)
+                .map(it -> (NextItem) it)
+                .toList();
+
+        return new ArrayList<>(buttonsOnly);
     }
 
     public void setTitle(String title) {
@@ -97,15 +179,15 @@ public class NextInventory extends NextInventoryListener {
         this.type = type;
     }
 
-    public void setBack(ButtonItem back) {
+    public void setBack(NextItem back) {
         this.back = back;
     }
 
-    public void setCurrent(ButtonItem current) {
+    public void setCurrent(NextItem current) {
         this.current = current;
     }
 
-    public void setNext(ButtonItem next) {
+    public void setNext(NextItem next) {
         this.next = next;
     }
 
@@ -137,39 +219,43 @@ public class NextInventory extends NextInventoryListener {
         return indexBlockedList;
     }
 
-    public ArrayList<ButtonItem> getActionList() {
+    public ArrayList<NextItem> getActionList() {
         return actionList;
     }
 
-    public ArrayList<ItemInventory> getItems() {
+    public ArrayList<NextItem> getItems() {
         return items;
     }
 
-    public ArrayList<ButtonItem> getItemsButton() {
-        return itemsButton;
+    public ArrayList<NextPage> getPages() {
+        return pages;
     }
 
     public InventoryType getType() {
         return type;
     }
 
-    public UUID getPlayer() {
-        return player;
+    public ArrayList<UUID> getPlayers() {
+        return players;
     }
 
     public Inventory getInstance() {
         return instance;
     }
 
-    public ButtonItem getBack() {
+    public NextItem getBack() {
         return back;
     }
 
-    public ButtonItem getCurrent() {
+    public NextItem getCurrent() {
         return current;
     }
 
-    public ButtonItem getNext() {
+    public int getCurrentPage() {
+        return this.currentPage;
+    }
+
+    public NextItem getNext() {
         return next;
     }
 }

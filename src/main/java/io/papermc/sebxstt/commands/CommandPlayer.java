@@ -12,19 +12,24 @@ import java.util.List;
 public class CommandPlayer {
     public static void build(Commands cmds) {
         cmds.register(
-                ReturnCommand.create("test", ctx -> {
-                    FunctionPlayer.Test(ctx);
-                    return 1;
-                })
-        );
-
-        cmds.register(
-                Commands.literal("invtest")
+                Commands.literal("test")
                         .then(Commands.argument("player", StringArgumentType.greedyString())
                                 .suggests(Suggest.PlayersSuggestions())
                                 .executes(ctx -> {
                                     String name = ctx.getArgument("player", String.class);
-                                    FunctionPlayer.inv(ctx, name);
+                                    FunctionPlayer.test(ctx, name);
+                                    return 1;
+                                })
+                        ).build()
+        );
+
+        cmds.register(
+                Commands.literal("test2")
+                        .then(Commands.argument("player", StringArgumentType.greedyString())
+                                .suggests(Suggest.PlayersSuggestions())
+                                .executes(ctx -> {
+                                    String name = ctx.getArgument("player", String.class);
+                                    FunctionPlayer.test2(ctx, name);
                                     return 1;
                                 })
                         ).build()

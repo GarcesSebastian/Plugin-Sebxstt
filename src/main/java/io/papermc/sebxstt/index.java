@@ -2,9 +2,8 @@ package io.papermc.sebxstt;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
-import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
 import io.papermc.sebxstt.helpers.GroupPermissions;
+import io.papermc.sebxstt.instances.enums.InventoryType;
 import io.papermc.sebxstt.instances.enums.PlayerTypeGroup;
 import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.instances.CheckPoint;
@@ -12,7 +11,10 @@ import io.papermc.sebxstt.instances.Main;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.functions.utils.Lib;
+import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
 import io.papermc.sebxstt.instances.ingame.inventory.NextInventoryProvider;
+import io.papermc.sebxstt.instances.ingame.inventory.enums.InventorySizeType;
+import io.papermc.sebxstt.instances.ingame.inventory.instances.NextItem;
 import io.papermc.sebxstt.managers.CommandManager;
 import io.papermc.sebxstt.providers.ConfigurationProvider;
 import io.papermc.sebxstt.providers.DataStoreProvider;
@@ -23,10 +25,9 @@ import io.papermc.sebxstt.serialize.data.PlayerGroupData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.apache.maven.artifact.DefaultArtifact;
-import org.apache.maven.model.Dependency;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,6 +49,8 @@ public class index extends JavaPlugin implements Listener {
     public static Main mainData = new Main();
     public static final Map<UUID, ArmorStand> nameTags = new HashMap<>();
     public static final MiniMessage mm = MiniMessage.miniMessage();
+    public static NextInventory NextGUI;
+
 
     @Override
     public void onEnable() {
@@ -60,6 +63,29 @@ public class index extends JavaPlugin implements Listener {
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             CommandManager.registerAll(event);
+        });
+
+        NextGUI = new NextInventory("Prueba", InventorySizeType.NORMAL, InventoryType.PAGINATION)
+                .pages(5);
+        NextItem bt = NextGUI.CustomItem("Diamond Unlimited Copy", "Get Diamond Unlimited", Material.DIAMOND, 2).button(true).insert(0);
+        NextItem paper = NextGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 5).draggable(false).insert(1);
+
+        bt.onClick(player -> {
+            player.sendMessage(mm.deserialize(
+                    "<blue>you was win x999 DIAMONDS</blue>"
+            ));
+        });
+
+        NextGUI.onBack(player -> {
+            player.sendMessage(mm.deserialize(
+                    "Has retrocedido"
+            ));
+        });
+
+        NextGUI.onNext(player -> {
+            player.sendMessage(mm.deserialize(
+                    "Has avanzado"
+            ));
         });
     }
 
@@ -147,6 +173,16 @@ public class index extends JavaPlugin implements Listener {
 
         if (grp != null) {
             grp.TargetMembers();
+        }
+    }
+
+    @EventHandler
+    public void onPackStatus(PlayerResourcePackStatusEvent e) {
+        switch (e.getStatus()) {
+            case SUCCESSFULLY_LOADED -> e.getPlayer().sendMessage("Resource pack cargado.");
+            case DECLINED -> e.getPlayer().kickPlayer("Debes aceptar el resource pack.");
+            case FAILED_DOWNLOAD -> e.getPlayer().sendMessage("Falló la descarga del pack.");
+            default -> {}
         }
     }
 

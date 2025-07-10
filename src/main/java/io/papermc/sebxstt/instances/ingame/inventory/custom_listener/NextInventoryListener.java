@@ -1,20 +1,33 @@
 package io.papermc.sebxstt.instances.ingame.inventory.custom_listener;
 
+import io.papermc.sebxstt.functions.utils.InPlayer;
 import io.papermc.sebxstt.instances.enums.InventoryType;
+import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
+import io.papermc.sebxstt.instances.ingame.inventory.instances.NextItem;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
+import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.next;
+
 public class NextInventoryListener {
+    public UUID nextInventory;
     public InventoryType type;
 
-    public NextInventoryListener(InventoryType type) {
+    public NextInventoryListener(UUID nextInventory, InventoryType type) {
+        this.nextInventory = nextInventory;
         this.type = type;
     }
 
     private Consumer<Player> onBackCallback;
     private Consumer<Player> onNextCallback;
-    private Runnable onRefreshCallback;
+    private boolean emittingRefresh = false;
+
+    private List<Runnable> onRefreshCallbacks = new ArrayList<>();
 
     public void onBack(Consumer<Player> onBackCallback) {
         if (type == InventoryType.PAGINATION) {
@@ -32,8 +45,8 @@ public class NextInventoryListener {
         }
     }
 
-    public void onRefresh(Runnable onRefreshCallback) {
-        this.onRefreshCallback = onRefreshCallback;
+    public void onRefresh(Runnable callback) {
+        this.onRefreshCallbacks.add(callback);
     }
 
     public void emitBack(Player player) {
@@ -49,8 +62,32 @@ public class NextInventoryListener {
     }
 
     public void emitRefresh() {
-        if (onRefreshCallback != null) {
-            onRefreshCallback.run();
+        if (emittingRefresh) return;
+        emittingRefresh = true;
+
+        try {
+            NextInventory nxt = next(nextInventory);
+
+            for (UUID idPlayer : nxt.getPlayers()) {
+                Player p = InPlayer.instance(idPlayer);
+                if (p == null) continue;
+                Inventory inv = p.getOpenInventory().getTopInventory();
+                for (NextItem item : nxt.getItems()) {
+                    inv.setItem(item.getIndex(), item.getInstance());
+                }
+            }
+
+            for (Runnable callback : onRefreshCallbacks) {
+                try {
+                    System.out.println("[NextInventoryListener] Run Callback OnRefresh");
+                    callback.run();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        } finally {
+            emittingRefresh = false;
         }
     }
+
 }
