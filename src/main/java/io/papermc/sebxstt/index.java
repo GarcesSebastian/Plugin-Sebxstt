@@ -67,8 +67,8 @@ public class index extends JavaPlugin implements Listener {
 
         NextGUI = new NextInventory("Prueba", InventorySizeType.NORMAL, InventoryType.PAGINATION)
                 .pages(5);
-        NextItem bt = NextGUI.CustomItem("Diamond Unlimited Copy", "Get Diamond Unlimited", Material.DIAMOND, 2).button(true).insert(0);
-        NextItem paper = NextGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 5).draggable(false).insert(1);
+        NextItem bt = NextGUI.CustomItem("Diamond Unlimited Copy", "Get Diamond Unlimited", Material.DIAMOND, 2).button(true).insert(1);
+        NextItem paper = NextGUI.CustomItem("Papel Modificado", "Papel unico en su especie", Material.PAPER, 5).draggable(false).insert(2);
 
         bt.onClick(player -> {
             player.sendMessage(mm.deserialize(

@@ -25,9 +25,6 @@ public class NextInventoryListener {
 
     private Consumer<Player> onBackCallback;
     private Consumer<Player> onNextCallback;
-    private boolean emittingRefresh = false;
-
-    private List<Runnable> onRefreshCallbacks = new ArrayList<>();
 
     public void onBack(Consumer<Player> onBackCallback) {
         if (type == InventoryType.PAGINATION) {
@@ -45,10 +42,6 @@ public class NextInventoryListener {
         }
     }
 
-    public void onRefresh(Runnable callback) {
-        this.onRefreshCallbacks.add(callback);
-    }
-
     public void emitBack(Player player) {
         if (onBackCallback != null) {
             onBackCallback.accept(player);
@@ -60,34 +53,4 @@ public class NextInventoryListener {
             onNextCallback.accept(player);
         }
     }
-
-    public void emitRefresh() {
-        if (emittingRefresh) return;
-        emittingRefresh = true;
-
-        try {
-            NextInventory nxt = next(nextInventory);
-
-            for (UUID idPlayer : nxt.getPlayers()) {
-                Player p = InPlayer.instance(idPlayer);
-                if (p == null) continue;
-                Inventory inv = p.getOpenInventory().getTopInventory();
-                for (NextItem item : nxt.getItems()) {
-                    inv.setItem(item.getIndex(), item.getInstance());
-                }
-            }
-
-            for (Runnable callback : onRefreshCallbacks) {
-                try {
-                    System.out.println("[NextInventoryListener] Run Callback OnRefresh");
-                    callback.run();
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
-        } finally {
-            emittingRefresh = false;
-        }
-    }
-
 }

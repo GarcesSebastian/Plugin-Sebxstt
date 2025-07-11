@@ -19,7 +19,7 @@ import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.*;
 public class NextItem {
     private UUID id;
     private UUID parent;
-    private UUID page;
+    private UUID pageID;
 
     private String name;
     private String description;
@@ -68,7 +68,10 @@ public class NextItem {
 
     public void render() {
         this.update();
-        next(this.parent).emitRefresh();
+
+        if (this.pageID == null) return;
+        NextInventory nextInventory = next(this.parent);
+        nextInventory.render();
     }
 
     public void onClick(Consumer<Player> onClickCallback) {
@@ -127,6 +130,9 @@ public class NextItem {
     public ItemStack getInstance() {
         return instance;
     }
+    public UUID getPageID() {
+        return pageID;
+    }
 
     public NextItem draggable(boolean draggable) {
         this.draggable = draggable;
@@ -147,9 +153,9 @@ public class NextItem {
         return this;
     }
     public NextItem page(int page) {
-        System.out.println("[NextItem] page: " + page + " item: " + this.name);
         NextPage pageInstance = pagination(page, this.parent);
-        pageInstance.insert(this.id);
+        if (pageInstance == null) throw new IllegalStateException("Page Not Found " + page);
+        pageInstance.insert(this);
         return this;
     }
     public NextItem insert(int page) {
@@ -159,8 +165,10 @@ public class NextItem {
         this.registry(true);
 
         if (page == nextInventory.getCurrentPage()) {
+            System.out.println("[NextItem] Insert In Current Page:" + nextInventory.getCurrentPage() + " - NextItem:" + this.getName());
             nextInventory.getInstance().setItem(this.getIndex(), this.getInstance());
         }
+
         return this;
     }
 
@@ -182,5 +190,8 @@ public class NextItem {
     }
     public void setParent(UUID parent) {
         this.parent = parent;
+    }
+    public void setPageID(UUID pageID) {
+        this.pageID = pageID;
     }
 }

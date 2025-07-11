@@ -16,6 +16,7 @@ import java.util.UUID;
 import static io.papermc.sebxstt.instances.ingame.inventory.NextInventoryProvider.nextInventoryList;
 
 public class InventoryHelper {
+
     public static Player verifyPlayer(UUID player) {
         Player plr = InPlayer.instance(player);
         if (plr == null) {
@@ -59,12 +60,11 @@ public class InventoryHelper {
         }
 
         InventoryType type = nextInventory.getType();
-        System.out.println("[InventoryHelper] After Resolve");
 
         if (type == InventoryType.PAGINATION) {
             int slots = nextInventory.getSize().getTotalSlots();
-            ArrayList<Integer> blockedList = new ArrayList<>(nextInventory.getSize().getBlockedSlots());
             int[] indexes = new int[]{slots - 6, slots - 5, slots - 4};
+            ArrayList<Integer> blockedList = new ArrayList<>(nextInventory.getSize().getBlockedSlots());
 
             for (int i : indexes) {
                 blockedList.remove((Integer) i);
@@ -75,37 +75,35 @@ public class InventoryHelper {
 
             NextItem BackItem = new NextItem("Retroceder", "Pagina anterior: 0", Material.ARROW, nextInventory);
             BackItem.setIndex(indexes[0]);
-            BackItem.button(true).insert(0).draggable(false);
+            BackItem.button(true).draggable(false);
             nextInventory.setBack(BackItem);
             nextInventory.getActionList().add(nextInventory.getBack());
             nextInventory.getItems().remove(BackItem);
 
             NextItem CurrentItem = new NextItem("Pagina Actual", "Pagina actual: 0", Material.CLOCK, nextInventory);
             CurrentItem.setIndex(indexes[1]);
-            CurrentItem.insert(0).draggable(false);
+            CurrentItem.draggable(false);
             nextInventory.setCurrent(CurrentItem);
             nextInventory.getActionList().add(nextInventory.getCurrent());
             nextInventory.getItems().remove(CurrentItem);
 
             NextItem NextItem = new NextItem("Avanzar", "Pagina siguiente: 1", Material.ARROW, nextInventory);
             NextItem.setIndex(indexes[2]);
-            NextItem.button(true).insert(0).draggable(false);
+            NextItem.button(true).draggable(false);
             nextInventory.setNext(NextItem);
             nextInventory.getActionList().add(nextInventory.getNext());
             nextInventory.getItems().remove(NextItem);
 
-            for (Integer index : nextInventory.getBlockedList()) {
-                if (index == indexes[0] || index == indexes[1] || index == indexes[2]) continue;
-                nextInventory.getInstance().setItem(index, blocked());
-            }
+            RenderPagination(nextInventory);
+            nextInventory.update();
 
             nextInventory.getBack().onClick(player -> {
-                System.out.println("[InventoryHelper] Clicked Back " + player.getName() + " - pages: " + nextInventory.getPages().size());
+                System.out.println("[InventoryHelper] Clicked Back " + player.getName() + " - pages: " + nextInventory.getPages().size() + " currentPage: " + nextInventory.getCurrentPage());
                 nextInventory.back();
                 nextInventory.emitBack(player);
             });
             nextInventory.getNext().onClick(player -> {
-                System.out.println("[InventoryHelper] Clicked Next " + player.getName() + " - pages: " + nextInventory.getPages().size());
+                System.out.println("[InventoryHelper] Clicked Next " + player.getName() + " - pages: " + nextInventory.getPages().size() + " currentPage: " + nextInventory.getCurrentPage());
                 nextInventory.next();
                 nextInventory.emitNext(player);
             });
@@ -126,21 +124,30 @@ public class InventoryHelper {
     public static NextItem item(UUID id, UUID inventory) {
         NextInventory instance = next(inventory);
         NextItem itemInstance = instance.getItems().stream().filter(im -> im.getId().equals(id)).findFirst().orElse(null);
-        if (itemInstance == null) throw new IllegalStateException("Item Not Found " + id);
+        if (itemInstance == null) {
+            System.out.println("Item Not Found " + id);
+            return null;
+        }
         return itemInstance;
     }
 
     public static NextPage pagination(int index, UUID inventory) {
         NextInventory instance = next(inventory);
         NextPage pageInstance = instance.getPages().stream().filter(p -> p.getIndex() == index).findFirst().orElse(null);
-        if (pageInstance == null) throw new IllegalStateException("Index Not Found " + index);
+        if (pageInstance == null) {
+            System.out.println("Page Not Found " + index);
+            return null;
+        }
         return pageInstance;
     }
 
     public static NextPage pagination(UUID page, UUID inventory) {
         NextInventory instance = next(inventory);
         NextPage pageInstance = instance.getPages().stream().filter(p -> p.getId().equals(page)).findFirst().orElse(null);
-        if (pageInstance == null) throw new IllegalStateException("Page Not Found " + page);
+        if (pageInstance == null) {
+            System.out.println("Page Not Found " + page);
+            return null;
+        }
         return pageInstance;
     }
 

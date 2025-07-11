@@ -34,7 +34,6 @@ public class InventoryListener implements Listener {
                 return;
             }
         }
-
         for (NextItem bt : inv.getActionList()) {
             if (bt.getIndex() == slot) {
                 event.setCancelled(true);

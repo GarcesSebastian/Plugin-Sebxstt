@@ -29,7 +29,7 @@ public class NextInventory extends NextInventoryListener {
     private NextItem current;
     private NextItem next;
 
-    private Integer currentPage = 0;
+    private Integer currentPage = 1;
 
     private ArrayList<NextItem> actionList = new ArrayList<>();
 
@@ -51,8 +51,7 @@ public class NextInventory extends NextInventoryListener {
         NextInventoryProvider.nextInventoryMap.put(this.instance, this);
         NextInventoryProvider.nextInventoryList.add(this);
 
-        System.out.println("[NextInventory] Before Resolve");
-        this.pages.add(new NextPage(this).index(0));
+        this.pages.add(new NextPage(this).index(1));
         resolve(this);
     }
 
@@ -75,65 +74,56 @@ public class NextInventory extends NextInventoryListener {
         return this;
     }
 
-    public void update(NextPage currentPage) {
+    public void render() {
+        NextPage currentPage = pagination(this.currentPage, this.id);
+        if (currentPage == null) return;
+
         this.instance.clear();
         RenderPagination(this);
 
         for (UUID item : currentPage.getStack()) {
-            try {
-                NextItem nextItem = item(item, this.id);
-                this.instance.setItem(nextItem.getIndex(), nextItem.getInstance());
-            } catch (IllegalStateException e) {
-                System.err.println("[Inventory Update] Fallo al cargar ítem: " + e.getMessage());
-            }
+            NextItem nextItem = item(item, this.id);
+            if (nextItem == null) continue;
+            this.instance.setItem(nextItem.getIndex(), nextItem.getInstance());
         }
+    }
 
-        String backDescription = (currentPage.getIndex() <= 0)
+    public void update() {
+        this.render();
+
+        String backDescription = (this.currentPage <= 1)
                 ? "<red>No puedes retroceder</red>"
-                : "Pagina anterior: <yellow>" + (currentPage.getIndex() - 1) + "</yellow>";
+                : "Pagina anterior: <yellow>" + (this.currentPage - 1) + "</yellow>";
 
-        String nextDescription = (currentPage.getIndex() >= this.pages.size() - 1)
+        String nextDescription = (this.currentPage >= this.pages.size())
                 ? "<red>No puedes avanzar</red>"
-                : "Pagina siguiente: <yellow>" + (currentPage.getIndex() + 1) + "</yellow>";
+                : "Pagina siguiente: <yellow>" + (this.currentPage + 1) + "</yellow>";
 
         this.back.setDescription(backDescription);
-        this.current.setDescription("Pagina actual: <yellow>" + currentPage.getIndex() + "</yellow>");
+        this.current.setDescription("Pagina actual: <yellow>" + this.currentPage + "</yellow>");
         this.next.setDescription(nextDescription);
     }
 
-
     public void back() {
-        System.out.println("[NextInventory] CurrentPage " + this.currentPage);
         if (this.currentPage <= 0) return;
         this.currentPage--;
-        NextPage currentPage = this.pages.stream().filter(p -> p.getIndex() == this.currentPage).findFirst().orElse(null);
-        if (currentPage == null) {
-            System.out.println("[NextInventory] Page Not Found " + this.currentPage);
+        if (this.pages.stream().noneMatch(p -> p.getIndex() == this.currentPage)) {
             this.currentPage++;
             return;
         }
 
-        System.out.println("[NextInventory] Resolve CurrentPage " + this.currentPage);
-        this.update(currentPage);
+        this.update();
     }
 
     public void next() {
-        System.out.println("[NextInventory] CurrentPage " + this.currentPage);
         if (this.currentPage >= this.pages.size() - 1) return;
         this.currentPage++;
-        NextPage currentPage = this.pages.stream()
-                .filter(p -> p.getIndex() == this.currentPage)
-                .findFirst()
-                .orElse(null);
-
-        if (currentPage == null) {
-            System.out.println("[NextInventory] Page Not Found " + this.currentPage);
+        if (this.pages.stream().noneMatch(p -> p.getIndex() == this.currentPage)) {
             this.currentPage--;
             return;
         }
 
-        System.out.println("[NextInventory] Resolve CurrentPage " + this.currentPage);
-        this.update(currentPage);
+        this.update();
     }
 
     public NextItem CustomItem(String name, String description, Material material, int index) {

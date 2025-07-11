@@ -5,6 +5,8 @@ import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static io.papermc.sebxstt.instances.ingame.inventory.InventoryHelper.pagination;
+
 public class NextPage {
     private UUID id;
     private int index;
@@ -17,11 +19,26 @@ public class NextPage {
         this.maxStack = nextInventory.getSize().getContentSlots();
     }
 
-    public NextPage insert(UUID instance) {
+    public NextPage insert(NextItem instance) throws IllegalStateException {
         if (stack.size() > maxStack) {
             throw new IllegalStateException("This Page is Full");
         }
-        this.stack.add(instance);
+
+        if (instance.getPageID() != null) {
+            NextPage beforePage = pagination(instance.getPageID(), instance.getParent());
+            if (beforePage == null) throw new IllegalStateException("[NextPage] Not Page Found " + instance.getPageID());
+            beforePage.remove(instance);
+        }
+
+        this.stack.add(instance.getId());
+        instance.setPageID(this.id);
+        return this;
+    }
+
+    public NextPage remove(NextItem instance) {
+        this.stack.remove(instance.getId());
+        instance.setPageID(null);
+
         return this;
     }
 
