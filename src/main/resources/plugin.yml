@@ -1,0 +1,18 @@
+name: Sebxstt
+version: 1.0.0
+main: com.sebxstt.index
+description: Plugin Sebxstt
+author: Sebxstt
+api-version: '1.21.4'
+depend: [ProtocolLib]
+commands:
+  group:
+    description: Gestión de grupos
+  clearteams:
+    description: Elimina todos los teams
+  return:
+    description: Te devuelve al punto de muerte
+  checkpoint:
+    description: Guardar Punto de reaparicion
+  stats:
+    description: Ver estadisticas del jugador
