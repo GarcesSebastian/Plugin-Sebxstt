@@ -1,7 +1,5 @@
 package com.sebxstt.functions.commands;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import com.sebxstt.functions.utils.InPlayer;
@@ -17,11 +15,9 @@ import com.sebxstt.managers.HttpManager;
 import com.sebxstt.providers.PluginProvider;
 import com.sebxstt.serialize.data.PlayerConfigData;
 import com.sebxstt.serialize.data.PlayerGroupData;
-import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -59,14 +55,14 @@ public class FunctionPlayer {
 
     public static void npc(CommandContext<CommandSourceStack> ctx, String name) throws Exception {
         if (!(ctx.getSource().getSender() instanceof Player viewer)) return;
-        CraftPlayer craftViewer = (CraftPlayer) viewer;
-        ServerPlayer viewerHandle = craftViewer.getHandle();
-
-        // Skin
-        FetchProfile prof = HttpManager.getProfile(name);
-        FetchTextures tex = HttpManager.getTextures(prof.id);
-        GameProfile gp = new GameProfile(UUID.randomUUID(), name);
-        gp.getProperties().put("textures", new Property("textures", tex.texture, tex.signature));
+//        CraftPlayer craftViewer = (CraftPlayer) viewer;
+//        ServerPlayer viewerHandle = craftViewer.getHandle();
+//
+//        // Skin
+//        FetchProfile prof = HttpManager.getProfile(name);
+//        FetchTextures tex = HttpManager.getTextures(prof.id);
+//        GameProfile gp = new GameProfile(UUID.randomUUID(), name);
+//        gp.getProperties().put("textures", new Property("textures", tex.texture, tex.signature));
 
 //        MinecraftServer server = viewerHandle.getServer();
 //        ServerLevel level = viewerHandle.serverLevel();

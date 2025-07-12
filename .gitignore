@@ -41,6 +41,10 @@ target/
 .springBeans
 .sts4-cache
 
+### Gradle ###
+.gradle
+/gradle
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
