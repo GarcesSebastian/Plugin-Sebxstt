@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.17'
+    id 'xyz.jpenilla.run-paper' version '2.3.1'
 }
 
 group = 'com'
@@ -23,7 +24,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle('1.21.4-R0.1-SNAPSHOT')
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("de.oliver:FancyHolograms:2.5.0")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
 }

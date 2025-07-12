@@ -1,5 +1,7 @@
 package com.sebxstt.functions.commands;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import com.sebxstt.functions.utils.InPlayer;
@@ -15,9 +17,23 @@ import com.sebxstt.managers.HttpManager;
 import com.sebxstt.providers.PluginProvider;
 import com.sebxstt.serialize.data.PlayerConfigData;
 import com.sebxstt.serialize.data.PlayerGroupData;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -53,41 +69,23 @@ public class FunctionPlayer {
         });
     }
 
-    public static void npc(CommandContext<CommandSourceStack> ctx, String name) throws Exception {
-        if (!(ctx.getSource().getSender() instanceof Player viewer)) return;
-//        CraftPlayer craftViewer = (CraftPlayer) viewer;
-//        ServerPlayer viewerHandle = craftViewer.getHandle();
-//
-//        // Skin
-//        FetchProfile prof = HttpManager.getProfile(name);
-//        FetchTextures tex = HttpManager.getTextures(prof.id);
-//        GameProfile gp = new GameProfile(UUID.randomUUID(), name);
-//        gp.getProperties().put("textures", new Property("textures", tex.texture, tex.signature));
+        public static void npc(CommandContext<CommandSourceStack> ctx, String name) throws Exception {
+            if (!(ctx.getSource().getSender() instanceof Player viewer)) return;
+            GameProfile profile = new GameProfile(UUID.randomUUID(), name);
 
-//        MinecraftServer server = viewerHandle.getServer();
-//        ServerLevel level = viewerHandle.serverLevel();
-//
-//        // Crear NPC
-//        ServerPlayer npc = new ServerPlayer(server, level, gp, ClientInformation.createDefault());
-//        server.getPlayerList().placeNewPlayer(dummyConn, npc, cookie);
-//        world.addNewPlayer(npc);
-//
-//        npc.setPos(viewer.getX(), viewer.getY(), viewer.getZ());
-//
-//        // Registrar NPC en la lista interna
-//        Connection dummyConn = new Connection(null);
-//        CommonListenerCookie cookie = CommonListenerCookie.createInitial(gp, true);
-//        server.getPlayerList().placeNewPlayer(dummyConn, npc, cookie);
-//
-//        // Crear wrappers
-//        ServerEntity wrapper = new ServerEntity(level, npc, 0, false, buf -> {}, Set.of());
-//
-//        // Envío únicamente al jugador que ejecuta el comando
-//        ServerGamePacketListenerImpl conn = viewerHandle.connection;
-//        conn.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
-//        conn.send(new ClientboundAddEntityPacket(npc, wrapper));
-//        conn.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.REMOVE_PLAYER, npc));
-    }
+            MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+            ServerLevel world = ((CraftWorld) viewer.getWorld()).getHandle();
+            ServerPlayer npc = new ServerPlayer(server, world, profile, ClientInformation.createDefault());
+            Location loc = viewer.getLocation();
+            npc.setPos(loc.getX(), loc.getY(), loc.getZ());
+
+            ServerGamePacketListenerImpl conn = ((CraftPlayer) viewer).getHandle().connection;
+            server.getPlayerList().placeNewPlayer(conn.connection, npc, CommonListenerCookie.createInitial(profile, true));
+
+            conn.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
+            conn.send(new ClientboundAddEntityPacket(npc, null));
+            conn.send(new ClientboundSetEntityDataPacket(npc.getId(), null));
+        }
 
     public static void ClearTeams(CommandContext<CommandSourceStack> ctx) {
         var senderRaw = ctx.getSource().getSender();
