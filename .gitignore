@@ -1,17 +1,11 @@
-target/
-!**/src/main/**/target/
-!**/src/test/**/target/
-
 ## enemigo / alianzas
 ## perdidas de recursos (cash, items, etc)
 
 ## Sistema economico
 
-## Arreglar erroes warpPoints
+## Enter with players memeber while owner off
 
-## Solucionar error con el parent de onClick
-
-## copy tag name of server bdwrs, etc (ping, level, kills, any)
+## QUITAR EXTENSION DEL FILESAVEDDATA
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -30,6 +24,11 @@ target/
 .settings
 .springBeans
 .sts4-cache
+
+### Gradle ###
+.gradle
+/gradle
+/build
 
 ### NetBeans ###
 /nbproject/private/
