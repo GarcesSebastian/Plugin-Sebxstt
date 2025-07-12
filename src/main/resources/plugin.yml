@@ -1,6 +1,6 @@
 name: Sebxstt
 version: 1.0.0
-main: io.papermc.sebxstt.index
+main: com.sebxstt.index
 description: Plugin Sebxstt
 author: Sebxstt
 api-version: '1.21.4'
