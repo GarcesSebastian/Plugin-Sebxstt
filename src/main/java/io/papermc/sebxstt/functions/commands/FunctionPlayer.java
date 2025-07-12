@@ -1,5 +1,7 @@
 package io.papermc.sebxstt.functions.commands;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.sebxstt.functions.utils.InPlayer;
@@ -7,14 +9,19 @@ import io.papermc.sebxstt.functions.utils.Lib;
 import io.papermc.sebxstt.instances.PlayerConfig;
 import io.papermc.sebxstt.instances.PlayersGroup;
 import io.papermc.sebxstt.instances.RequestGroup;
+import io.papermc.sebxstt.instances.http.FetchProfile;
+import io.papermc.sebxstt.instances.http.FetchTextures;
 import io.papermc.sebxstt.instances.ingame.inventory.NextInventory;
 import io.papermc.sebxstt.instances.ingame.inventory.NextInventoryProvider;
+import io.papermc.sebxstt.managers.HttpManager;
 import io.papermc.sebxstt.providers.PluginProvider;
 import io.papermc.sebxstt.serialize.data.PlayerConfigData;
 import io.papermc.sebxstt.serialize.data.PlayerGroupData;
+import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -48,6 +55,42 @@ public class FunctionPlayer {
             item.setName(UUID.randomUUID().toString().substring(0, 8));
             item.draggable(true);
         });
+    }
+
+    public static void npc(CommandContext<CommandSourceStack> ctx, String name) throws Exception {
+        if (!(ctx.getSource().getSender() instanceof Player viewer)) return;
+        CraftPlayer craftViewer = (CraftPlayer) viewer;
+        ServerPlayer viewerHandle = craftViewer.getHandle();
+
+        // Skin
+        FetchProfile prof = HttpManager.getProfile(name);
+        FetchTextures tex = HttpManager.getTextures(prof.id);
+        GameProfile gp = new GameProfile(UUID.randomUUID(), name);
+        gp.getProperties().put("textures", new Property("textures", tex.texture, tex.signature));
+
+//        MinecraftServer server = viewerHandle.getServer();
+//        ServerLevel level = viewerHandle.serverLevel();
+//
+//        // Crear NPC
+//        ServerPlayer npc = new ServerPlayer(server, level, gp, ClientInformation.createDefault());
+//        server.getPlayerList().placeNewPlayer(dummyConn, npc, cookie);
+//        world.addNewPlayer(npc);
+//
+//        npc.setPos(viewer.getX(), viewer.getY(), viewer.getZ());
+//
+//        // Registrar NPC en la lista interna
+//        Connection dummyConn = new Connection(null);
+//        CommonListenerCookie cookie = CommonListenerCookie.createInitial(gp, true);
+//        server.getPlayerList().placeNewPlayer(dummyConn, npc, cookie);
+//
+//        // Crear wrappers
+//        ServerEntity wrapper = new ServerEntity(level, npc, 0, false, buf -> {}, Set.of());
+//
+//        // Envío únicamente al jugador que ejecuta el comando
+//        ServerGamePacketListenerImpl conn = viewerHandle.connection;
+//        conn.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc));
+//        conn.send(new ClientboundAddEntityPacket(npc, wrapper));
+//        conn.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.REMOVE_PLAYER, npc));
     }
 
     public static void ClearTeams(CommandContext<CommandSourceStack> ctx) {

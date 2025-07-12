@@ -89,8 +89,6 @@ public class NextInventory extends NextInventoryListener {
     }
 
     public void update() {
-        this.render();
-
         String backDescription = (this.currentPage <= 1)
                 ? "<red>No puedes retroceder</red>"
                 : "Pagina anterior: <yellow>" + (this.currentPage - 1) + "</yellow>";
@@ -102,6 +100,8 @@ public class NextInventory extends NextInventoryListener {
         this.back.setDescription(backDescription);
         this.current.setDescription("Pagina actual: <yellow>" + this.currentPage + "</yellow>");
         this.next.setDescription(nextDescription);
+
+        this.render();
     }
 
     public void back() {
@@ -116,7 +116,7 @@ public class NextInventory extends NextInventoryListener {
     }
 
     public void next() {
-        if (this.currentPage >= this.pages.size() - 1) return;
+        if (this.currentPage >= this.pages.size()) return;
         this.currentPage++;
         if (this.pages.stream().noneMatch(p -> p.getIndex() == this.currentPage)) {
             this.currentPage--;
@@ -135,7 +135,7 @@ public class NextInventory extends NextInventoryListener {
 
     public NextInventory pages(int amount) {
         for (int i = 0; i < amount; i++) {
-            NextPage newPage = new NextPage(this).index(this.pages.size());
+            NextPage newPage = new NextPage(this).index(this.pages.size() + 1);
             this.pages.add(newPage);
         }
 

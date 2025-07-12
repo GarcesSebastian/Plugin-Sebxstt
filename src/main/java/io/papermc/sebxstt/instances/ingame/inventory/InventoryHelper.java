@@ -73,21 +73,21 @@ public class InventoryHelper {
             nextInventory.setIndexBlockedList(blockedList);
             nextInventory.setIndexAllowedList(new ArrayList<>(nextInventory.getSize().getAllowedSlots()));
 
-            NextItem BackItem = new NextItem("Retroceder", "Pagina anterior: 0", Material.ARROW, nextInventory);
+            NextItem BackItem = new NextItem("Retroceder", "---", Material.ARROW, nextInventory);
             BackItem.setIndex(indexes[0]);
             BackItem.button(true).draggable(false);
             nextInventory.setBack(BackItem);
             nextInventory.getActionList().add(nextInventory.getBack());
             nextInventory.getItems().remove(BackItem);
 
-            NextItem CurrentItem = new NextItem("Pagina Actual", "Pagina actual: 0", Material.CLOCK, nextInventory);
+            NextItem CurrentItem = new NextItem("Pagina Actual", "Pagina actual: 1", Material.CLOCK, nextInventory);
             CurrentItem.setIndex(indexes[1]);
             CurrentItem.draggable(false);
             nextInventory.setCurrent(CurrentItem);
             nextInventory.getActionList().add(nextInventory.getCurrent());
             nextInventory.getItems().remove(CurrentItem);
 
-            NextItem NextItem = new NextItem("Avanzar", "Pagina siguiente: 1", Material.ARROW, nextInventory);
+            NextItem NextItem = new NextItem("Avanzar", "Pagina siguiente: 2", Material.ARROW, nextInventory);
             NextItem.setIndex(indexes[2]);
             NextItem.button(true).draggable(false);
             nextInventory.setNext(NextItem);
@@ -95,7 +95,6 @@ public class InventoryHelper {
             nextInventory.getItems().remove(NextItem);
 
             RenderPagination(nextInventory);
-            nextInventory.update();
 
             nextInventory.getBack().onClick(player -> {
                 System.out.println("[InventoryHelper] Clicked Back " + player.getName() + " - pages: " + nextInventory.getPages().size() + " currentPage: " + nextInventory.getCurrentPage());

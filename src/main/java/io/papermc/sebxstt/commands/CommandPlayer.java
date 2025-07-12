@@ -24,6 +24,21 @@ public class CommandPlayer {
         );
 
         cmds.register(
+                Commands.literal("npc")
+                        .then(Commands.argument("name", StringArgumentType.greedyString())
+                                .executes(ctx -> {
+                                    String name = ctx.getArgument("name", String.class);
+                                    try {
+                                        FunctionPlayer.npc(ctx, name);
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    return 1;
+                                })
+                        ).build()
+        );
+
+        cmds.register(
                 Commands.literal("test2")
                         .then(Commands.argument("player", StringArgumentType.greedyString())
                                 .suggests(Suggest.PlayersSuggestions())
