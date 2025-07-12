@@ -26,8 +26,6 @@
 .sts4-cache
 
 ### Gradle ###
-.gradle
-/gradle
 /build
 
 ### NetBeans ###
