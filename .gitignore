@@ -3,21 +3,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-## JUEGO AMIGO NO PERMITIDO ENTRE MIEMBROS (Check)
-## ALIAS (Check)
-## BAUL COMPARTIDO (Check)
-
 ## enemigo / alianzas
 ## perdidas de recursos (cash, items, etc)
 
-## Cuando se hace leave del grupo se mantiene el estado de no golpear miembros del grupo (Check)
-
 ## Sistema economico
-
-## actualizar board al abandonar el grupo (Check)
-
-## No se eliminan los pendings del grupo datastore (Check)
-## No se elimina el grupo disolvivdo datastore (Check)
 
 ## Enter with players memeber while owner off
 
